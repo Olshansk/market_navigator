@@ -2,7 +2,7 @@
     "name": "Market Navigator",
     "version": "1.0",
     "description": "Notifications and tools to navigate a turbulent market.",
-    "permissions": ["declarativeContent", "storage", "*://*/*"],
+    "permissions": ["activeTab" ,"declarativeContent", "storage", "*://*/*"],
     "background": {
       "scripts": ["background.js"],
       "persistent": false
