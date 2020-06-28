@@ -13,6 +13,10 @@ class Item(BaseModel):
 async def read_root():
     return {"Hello": "World"}
 
+@app.get("/market_state")
+async def market_state():
+    return {"top-stocks_label": "5", "bottom_stocks_label": "10"}
+
 @app.get("/items/{item_id}")
 async def read_item(item_id: int, q: str = None):
     return {"item_id": item_id, "q": q}
