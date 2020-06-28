@@ -1,11 +1,10 @@
-1. Use SQL Alchemy to set up a DB: https://fastapi.tiangolo.com/tutorial/sql-databases/
+1. Change % stocks in top/bottom to run as a cron job.
+- Implement the algorithm in the backend:
+- http://127.0.0.1:8888/notebooks/Untitled2.ipynb
+2. Use SQL Alchemy to set up a DB:
+- https://fastapi.tiangolo.com/tutorial/sql-databases/
+3. Save data from cron job to DB
+4. Update data to read it and return it in the api endpoint /market_state
 2. Deploy services to GCP:
 - https://console.cloud.google.com/home/dashboard?project=market-navigator-281018&folder=
 - https://cloud.google.com/kubernetes-engine/docs/tutorials/hello-app
-3. Make HTTP request from chrome extension to FastAPI
-- https://stackoverflow.com/questions/25107774/how-do-i-send-an-http-get-request-from-a-chrome-extension
-4. Implement the algorithm in the backend:
-- http://127.0.0.1:8888/notebooks/Untitled2.ipynb
-5. Cache algo data in a postgresDB
-6. Look into configuring chrome extension with firebase: https://www.originate.com/chrome-extension-firebase-real-time-database/
-7. 
