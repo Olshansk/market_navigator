@@ -1,15 +1,14 @@
-let changeColor = document.getElementById('changeColor');
+function updateMarketState() {
+  console.log("Calling updateMarketState");
+  fetch('http://localhost:8080/market_state')
+    .then(r => r.json())
+    .then(result => {
+      $('#topStocksLabel').text(result['top_stocks_label']);
+      $('#bottomStocksLabel').text(result['bottom_stocks_label']);
+    });
+}
 
-chrome.storage.sync.get('color', function(data) {
-  changeColor.style.backgroundColor = data.color;
-  changeColor.setAttribute('value', data.color);
+$(function(){
+  updateMarketState();
+  $('#marketState').on('click', updateMarketState);
 });
-
-changeColor.onclick = function(element) {
-   let color = element.target.value;
-   chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-     chrome.tabs.executeScript(
-         tabs[0].id,
-         {code: 'document.body.style.backgroundColor = "' + color + '";'});
-   });
- };

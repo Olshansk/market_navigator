@@ -15,7 +15,7 @@ async def read_root():
 
 @app.get("/market_state")
 async def market_state():
-    return {"top-stocks_label": "5", "bottom_stocks_label": "10"}
+    return {"top_stocks_label": "5", "bottom_stocks_label": "10"}
 
 @app.get("/items/{item_id}")
 async def read_item(item_id: int, q: str = None):

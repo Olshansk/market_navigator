@@ -2,15 +2,20 @@
     "name": "Market Navigator",
     "version": "1.0",
     "description": "Notifications and tools to navigate a turbulent market.",
-    "permissions": ["activeTab" ,"declarativeContent", "storage", "*://*/*"],
+    "permissions": [
+      "activeTab",
+      "declarativeContent",
+      "storage",
+      "*://*/*"
+    ],
     "background": {
       "scripts": [
-        "background.js",
-        "hot_reload.js"
+        "hot_reload.js",
+        "background.js"
       ],
       "persistent": false
     },
-    "page_action": {
+    "browser_action": {
       "default_popup": "popup.html",
       "default_icon": {
         "16": "images/get_started16.png",
@@ -19,6 +24,7 @@
         "128": "images/get_started128.png"
       }
     },
+    "content_security_policy": "script-src 'self' https://ajax.googleapis.com https://maxcdn.bootstrapcdn.com; object-src 'self'",
     "options_page": "options.html",
     "icons": {
       "16": "images/get_started16.png",
