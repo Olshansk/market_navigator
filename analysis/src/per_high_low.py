@@ -4,9 +4,10 @@ import pandas as pd
 import math
 import numpy as np
 import matplotlib.pyplot as plt
+import json
+
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
-
 from iexfinance.refdata import get_symbols, get_iex_symbols, get_symbols
 from iexfinance.stocks import get_historical_data
 from iexfinance.altdata import get_social_sentiment
@@ -26,6 +27,8 @@ else:
 NUM_BUS_DAYS = 252 # TODO(olshansky): Better way to convert 52 weeks to BUS_DAYS
 MAX_DELTA_PER = 0.2
 NUM_YEARS_HISTORY = 5
+RED = "#FF0000"
+BLUE = "#0000FF"
 
 def is_near_min(delta):
     def is_near_min_internal(row):
@@ -74,7 +77,7 @@ def get_min_max_dfs(symbols):
             df = drop_duplicate_indecies(df)
 
             df['rolling_max'] = df['close'].rolling(window=NUM_BUS_DAYS, min_periods=NUM_BUS_DAYS).max()
-                df['rolling_min'] = df['close'].rolling(window=NUM_BUS_DAYS, min_periods=NUM_BUS_DAYS).min()
+            df['rolling_min'] = df['close'].rolling(window=NUM_BUS_DAYS, min_periods=NUM_BUS_DAYS).min()
 
             min_key = f'{symbol}_near_min'
             max_key = f'{symbol}_near_max'
@@ -96,13 +99,36 @@ def compute_stocks_near_max_min(df_max, df_min):
 
     return df_res
 
+def save_daily_results(df):
+    ax = df.plot(color=[RED, BLUE], figsize=(20,10))
+    ax.set_title(f"Percentage of stocks within {MAX_DELTA_PER * 100}% of 52 week min/max.")
+    ax.axhline(y=df['near_max'].mean(), linestyle='--', color=RED)
+    ax.axhline(y=df['near_min'].mean(), linestyle='--', color=BLUE)
+
+    fig = ax.get_figure()
+    fig.savefig("/market_navigator_data/per_high_low.png")
+
+    data = {
+        'near_max' : df.iloc[-1].near_max,
+        'near_min' : df.iloc[-1].near_min,
+        'avg_near_max' : df.iloc[-1].near_min,
+        'avg_near_min' : df.iloc[-1].near_min
+    }
+    with open('/market_navigator_data/per_high_low.json', 'w') as f:
+        json.dump(data, f)
+
+
+# Jul 02, 2020: The current Mayer Multiple is 1.09 with a $BTC price of $USD 9,096.67 and a 200 day moving average of $8,357.27 USD. The
+# @TIPMayerMultple
+#  has historically been higher 59.88% of the time with an average of 1.44. Learn more at:
+
+
 def main():
     all_symbols = get_symbols(token=IEX_TOKEN)[:LAST_SYMBOL_IDX]
     (df, df_min, df_max) = get_min_max_dfs(all_symbols)
     df_res = compute_stocks_near_max_min(df_max, df_min)
-    result = df_res.plot(title=f"Percentage of stocks within {MAX_DELTA_PER * 100}% of 52 week min/max.", figsize=(20,10))
-    fig = result.get_figure()
-    fig.savefig("per_high_low.png")
+    save_daily_results(df_res)
+
 
 if __name__ == "__main__":
     main()
