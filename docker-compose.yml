@@ -24,3 +24,16 @@ services:
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "postgres"
       POSTGRES_DB: "postgres"
+
+  analysis:
+    container_name: analysis
+    build:
+      context: ./analysis
+      dockerfile: Dockerfile
+    volumes:
+      - ./analysis/src:/usr/src/app
+    # restart: always
+    environment:
+      ENVIRONMENT: "dev"
+    tty: true
+    entrypoint: /bin/bash

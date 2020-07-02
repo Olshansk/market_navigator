@@ -1,0 +1,16 @@
+certifi==2020.6.20
+chardet==3.0.4
+cycler==0.10.0
+idna==2.10
+iexfinance==0.4.3
+kiwisolver==1.2.0
+matplotlib==3.2.2
+numpy==1.19.0
+pandas==1.0.5
+pyparsing==2.4.7
+python-dateutil==2.8.1
+pytz==2020.1
+requests==2.24.0
+requests-cache==0.5.2
+six==1.15.0
+urllib3==1.25.9
