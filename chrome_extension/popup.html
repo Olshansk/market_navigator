@@ -3,48 +3,47 @@
   <head>
     <link rel="stylesheet" type="text/css" href="popup.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<!--
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script> -->
+
   </head>
   <body>
     <script src="popup.js"></script>
 
-    <!-- TODO(olshansky): Get nav-fill to work -->
     <ul class="nav nav-tabs">
-      <li class="active"><a id="marketState" data-toggle="tab" href="#home">Market State</a></li>
-      <li><a id="metric1" data-toggle="tab" href="#menu1">Metric 1</a></li>
-      <li><a id="metric2" data-toggle="tab" href="#menu2">Metric 2</a></li>
-      <li><a id="metric3" data-toggle="tab" href="#menu3">Metric 3</a></li>
+      <li class="active"><a id="marketState" data-toggle="tab" href="#menu1">Market State</a></li>
+      <li><a id="metric1" data-toggle="tab" href="#menu2">More Metrics</a></li>
     </ul>
 
-    <div class="tab-content">
-      <div id="home" class="tab-pane fade in active">
-        <h3>Market State</h3>
+    <div class="market_state tab-content">
+      <div id="menu1" class="tab-pane fade in active">
+        <h3 class="market_state_header">Market State</h3>
 
         <div class="control-group">
-          <label class="control-label">% stocks within top:</label>
+          <h4><label class="control-label">Stocks Up</label></h4>
           <label id="topStocksLabel" class="control-label static-text"></label>
         </div>
 
         <div class="control-group">
-          <label class="control-label">% stocks within bottom:</label>
+          <h4><label class="control-label">Stocks Down</label></h4>
           <label id="bottomStocksLabel"  class="control-label static-text"></label>
+        </div>
+
+        <div class="aligncenter">
+          <a href="#" id="pop" class="aligncenter">
+            <img src="per_high_low.png" style="width: 600px; height: 300px;">
+            <figcaption> Click to Enlarge </figcaption>
+          </a>
         </div>
       </div>
 
-      <div id="menu1" class="tab-pane">
-        <h3>Metric 1</h3>
-        <p>Coming soon.</p>
-      </div>
-
       <div id="menu2" class="tab-pane">
-        <h3>Metric 2</h3>
-        <p>Coming soon.</p>
-      </div>
-
-      <div id="menu3" class="tab-pane">
-        <h3>Metric 3</h3>
-        <p>Coming soon.</p>
+        <h3>More Metrics</h3>
+        <p>Coming soon!</p>
       </div>
 
     </div>

@@ -1,8 +1,20 @@
 body {
-    min-width:400px;
-    min-height:100px;
+    min-width:790px;
+    min-height:590px;
 }
 
 .static-text {
     font-weight: normal;
+}
+
+.market_state_header {
+  margin-bottom: 20px;
+}
+
+.market_state {
+  margin-left: 20px;
+}
+
+.aligncenter {
+  text-align: center;
 }
