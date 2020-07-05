@@ -5,7 +5,3 @@ chrome.runtime.onInstalled.addListener(function() {
     console.log("The color is green.");
   });
 });
-
-
-// chrome.tabs.executeScript(null, {file:'jquery.js'}, function(result){
-// });

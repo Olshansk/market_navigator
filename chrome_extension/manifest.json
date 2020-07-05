@@ -12,18 +12,29 @@
       "contextMenus",
       "tabs"
     ],
-    "web_accessible_resources": ["per_high_low.png"],
+    "web_accessible_resources": [
+      "css/content_script.css",
+      "per_high_low.png"
+    ],
     "background": {
       "persistent": false,
-      "scripts": ["hot_reload.js", "background.js"]
+      "scripts": [
+        "js/third_party/hot_reload.js",
+        "js/background.js"
+      ]
     },
     "content_scripts": [{
       "matches": ["*://*/*"],
-      "js": ["jquery3.5.1.min.js", "bootstrap4.0.0.min.js", "content_script.js", "iframeResizer.min.js", "iframeResizer.contentWindow.min.js"],
-      "css": ["bootstrap4.0.0.min.css", "w3.css", "temp.css"]
+      "js": [
+        "js/content_script.js"
+      ],
+      "css": [
+        "css/third_party/w3.css",
+        "css/content_script.css"
+      ]
     }],
     "browser_action": {
-      "default_popup": "popup.html",
+      "default_popup": "html/popup.html",
       "default_icon": {
         "16": "images/get_started16.png",
         "32": "images/get_started32.png",
@@ -33,7 +44,7 @@
     },
 
     "content_security_policy": "script-src 'self' https://ajax.googleapis.com https://maxcdn.bootstrapcdn.com; object-src 'self'",
-    "options_page": "options.html",
+    "options_page": "html/options.html",
     "icons": {
       "16": "images/get_started16.png",
       "32": "images/get_started32.png",
