@@ -1,0 +1,10 @@
+#myIframe {
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
+
+.parent-myIframe{
+   overflow: auto;
+   float:left;
+}

@@ -19,8 +19,8 @@
     },
     "content_scripts": [{
       "matches": ["*://*/*"],
-      "js": ["jquery3.5.1.min.js", "bootstrap4.0.0.min.js", "content_script.js"],
-      "css": ["bootstrap4.0.0.min.css", "w3.css"]
+      "js": ["jquery3.5.1.min.js", "bootstrap4.0.0.min.js", "content_script.js", "iframeResizer.min.js", "iframeResizer.contentWindow.min.js"],
+      "css": ["bootstrap4.0.0.min.css", "w3.css", "temp.css"]
     }],
     "browser_action": {
       "default_popup": "popup.html",

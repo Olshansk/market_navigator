@@ -61,8 +61,10 @@ $(function() {
     $.get(chrome.extension.getURL('/modal.html'), function(data) {
       $.get(chrome.extension.getURL('/modal2.html'), function(data2) {
         var image_url = chrome.runtime.getURL($('#imageresource').attr('src'));
+        var js_url = chrome.runtime.getURL('/iframeResizer.contentWindow.min.js');
+        console.log(js_url);
         var element = htmlToElement(data2)
-        var s = `var image_url= \`${image_url}\`;var modal_html = \`${data2}\``;
+        var s = `var js_url=\`${js_url}\`; var image_url= \`${image_url}\`; var modal_html = \`${data2}\``;
         // console.log(s);
         // console.log();
         // $(element).appendTo('body');
@@ -72,6 +74,8 @@ $(function() {
 
           // Or if you're using jQuery 1.8+:
           // $($.parseHTML(data)).appendTo('body');
+          chrome.tabs.executeScript(null, {file:'iframeResizer.min.js'});
+          // chrome.tabs.executeScript(null, {file:'iframeResizer.contentWindow.min.js'});
           chrome.tabs.executeScript(null, {file:'jquery3.5.1.min.js'}, function(result){
             chrome.tabs.executeScript(null, { code: s }, function(result) {
               chrome.tabs.executeScript(null, { file: 'content_script.js' }, function(result){
