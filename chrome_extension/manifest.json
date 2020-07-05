@@ -12,13 +12,15 @@
       "contextMenus",
       "tabs"
     ],
+    "web_accessible_resources": ["per_high_low.png"],
     "background": {
       "persistent": false,
       "scripts": ["hot_reload.js", "background.js"]
     },
     "content_scripts": [{
       "matches": ["*://*/*"],
-      "js": ["jquery3.5.1.min.js", "bootstrap3.4.1.min.js", "content_script.js"]
+      "js": ["jquery3.5.1.min.js", "bootstrap4.0.0.min.js", "content_script.js"],
+      "css": ["bootstrap4.0.0.min.css", "w3.css"]
     }],
     "browser_action": {
       "default_popup": "popup.html",

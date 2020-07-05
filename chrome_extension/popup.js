@@ -59,22 +59,24 @@ $(function() {
 
 
     $.get(chrome.extension.getURL('/modal.html'), function(data) {
-      $.get(chrome.extension.getURL('/modal.html'), function(data) {
-        // var image_url = chrome.runtime.getURL($('#imageresource').attr('src'));
-        var element = htmlToElement(data)
-        var s = `var modal_html = \`${data}\``;
-        console.log(s);
-        $(element).appendTo('body');
-        console.log();
-        // $('#imagepreview').attr('src', $('#imageresource').attr('src'));
-        $('#imagemodal').modal('show');
+      $.get(chrome.extension.getURL('/modal2.html'), function(data2) {
+        var image_url = chrome.runtime.getURL($('#imageresource').attr('src'));
+        var element = htmlToElement(data2)
+        var s = `var image_url= \`${image_url}\`;var modal_html = \`${data2}\``;
+        // console.log(s);
+        // console.log();
+        // $(element).appendTo('body');
+        // $('#imagepreview').attr('src', image_url);
+        // $('#imagemodal').modal('show');
           // console.log(data);
 
           // Or if you're using jQuery 1.8+:
           // $($.parseHTML(data)).appendTo('body');
-          chrome.tabs.executeScript(null, {file:'jquery.js'}, function(result){
+          chrome.tabs.executeScript(null, {file:'jquery3.5.1.min.js'}, function(result){
             chrome.tabs.executeScript(null, { code: s }, function(result) {
-              chrome.tabs.executeScript(null, { file: 'content_script.js' });
+              chrome.tabs.executeScript(null, { file: 'content_script.js' }, function(result){
+                // window.close();
+              });
             });
           });
       });

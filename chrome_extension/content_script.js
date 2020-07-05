@@ -5,18 +5,26 @@ function htmlToElement(html) {
     return template.content.firstChild;
 }
 
-var iframe = document.createElement('iframe');
-var html = '<body>Foo</body>';
-iframe.src = 'data:text/html;charset=utf-8,' + encodeURI(modal_html);
-document.body.appendChild(iframe);
-console.log('iframe.contentWindow =', iframe.contentWindow);
+// var iframe = document.createElement('iframe');
+// var html = '<body>Foo</body>';
+// iframe.src = 'data:text/html;charset=utf-8,' + encodeURI(modal_html);
+// document.body.appendChild(iframe);
+// console.log('iframe.contentWindow =', iframe.contentWindow);
 
-// console.log("Executing content_script.js");
-// console.log(modal_html);
-// $(htmlToElement(modal_html)).appendTo('body');
+console.log("Executing content_script.js");
+console.log(modal_html);
+$(htmlToElement(modal_html)).appendTo('body');
+// $('#imagepreview').attr('src', $('#imageresource').attr('src'));
+// $('#imagepreview').attr('src', "https://cdn.vox-cdn.com/thumbor/lcR5ObLoDAonmUMUON1eEqFcpY4=/0x0:2000x3000/920x613/filters:focal(711x1198:1031x1518):format(webp)/cdn.vox-cdn.com/uploads/chorus_image/image/66980073/1227448347.jpg.5.jpg");
 // $('#imagemodal').modal('show');
-// // console.log("HELLO")
-//  // $('#imagemodal').modal('show');
+
+var url = "https://cdn.vox-cdn.com/thumbor/lcR5ObLoDAonmUMUON1eEqFcpY4=/0x0:2000x3000/920x613/filters:focal(711x1198:1031x1518):format(webp)/cdn.vox-cdn.com/uploads/chorus_image/image/66980073/1227448347.jpg.5.jpg";
+// var url = image_url;
+document.getElementById("img01").src = url;
+document.getElementById("modal01").style.display = "block";
+
+// console.log("HELLO")
+ // $('#imagemodal').modal('show');
 //
 // // Got solution from https://stackoverflow.com/questions/21314897/access-dom-elements-through-chrome-extension
 // chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {

@@ -2,22 +2,17 @@
 <html>
   <head>
     <link rel="stylesheet" type="text/css" href="popup.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-
-<!--
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script> -->
-
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
   </head>
   <body>
     <script src="popup.js"></script>
 
     <ul class="nav nav-tabs">
-      <li class="active"><a id="marketState" data-toggle="tab" href="#menu1">Market State</a></li>
-      <li><a id="metric1" data-toggle="tab" href="#menu2">More Metrics</a></li>
-    </ul>
+       <li class="nav-item"><a data-toggle="tab" class="nav-link active" href="#menu1">Market State</a></li>
+       <li class="nav-item"><a data-toggle="tab" class="nav-link" href="#menu2">More Metrics</a></li>
+     </ul>
 
     <div class="market_state tab-content">
       <div id="menu1" class="tab-pane fade in active">
@@ -35,7 +30,7 @@
 
         <div class="aligncenter">
           <a href="#" id="pop" class="aligncenter">
-            <img src="per_high_low.png" style="width: 600px; height: 300px;">
+            <img id="imageresource" src="per_high_low.png" style="width: 600px; height: 300px;">
             <figcaption> Click to Enlarge </figcaption>
           </a>
         </div>
