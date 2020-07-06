@@ -1,0 +1,20 @@
+# cronjob.yaml
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: analysis
+spec:
+  schedule: "0 0 * * *"
+  concurrencyPolicy: "Forbid"
+  suspend: true
+  failedJobsHistoryLimit: 3
+  successfulJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: market-state
+              image: gcr.io/market-navigator-281018/market_navigator_analysis:v1
+              command: ["python",  "per_high_low.py"]
+          restartPolicy: OnFailure

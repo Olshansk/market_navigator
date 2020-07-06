@@ -1,3 +1,10 @@
+Context:
+- Build docker image for analysis
+- Push docker image for analysis
+- Finish cron job to write static data
+- Save image and static data somewhere in cloud storage
+
+
 Data
 ====
 1. Cron Job: make the python script run as a cron job on GCP.
