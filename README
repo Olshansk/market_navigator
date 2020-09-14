@@ -1,29 +1,10 @@
-Context:
-- Build docker image for analysis
-- Push docker image for analysis
-- Finish cron job to write static data
-- Save image and static data somewhere in cloud storage
+Development Notes (minikube)
+=================
 
+$ mk stop
+$ make minikube_start_with_mount
+$ make gcloud_auth_docker
 
-Data
-====
-1. Cron Job: make the python script run as a cron job on GCP.
-- Write the image and the static daily data to cloud storage on GCP
-
-Chrome extension
-================
-1. Remove code related to the chrome extension tutorial
-2. Create a good options page
-3. Prettify the chrome extension page
-
-Deployment
-=========
-1. Deploy services to GCP:
-- https://console.cloud.google.com/home/dashboard?project=market-navigator-281018&folder=
-- https://cloud.google.com/kubernetes-engine/docs/tutorials/hello-app
-
-Future
-======
-1. Use SQL Alchemy to set up a DB:
-- https://fastapi.tiangolo.com/tutorial/sql-databases/
-2. Save Data from cron job to a DB (when we have other metrics too)
+$ kubectl create -f volumes
+$ kubectl create -f api
+$ kubectl create -f analysis

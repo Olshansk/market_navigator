@@ -5,4 +5,4 @@ ARG BUILD_TIME=unknown
 LABEL url-shortener.version=${BUILD_COMMIT} \
       url-shortener.build-time=${BUILD_TIME}
 
-COPY ./app /app
+WORKDIR /usr/src/app

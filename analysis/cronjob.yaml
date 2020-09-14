@@ -1,4 +1,3 @@
-# cronjob.yaml
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
@@ -15,8 +14,19 @@ spec:
     spec:
       template:
         spec:
+          restartPolicy: OnFailure
+          volumes:
+            - name: src-pv-storage
+              persistentVolumeClaim:
+                claimName: src-pv-claim
           containers:
             - name: market-state
-              image: gcr.io/market-navigator-281018/market_navigator_analysis:v1
+              image: gcr.io/market-navigator-281018/market_navigator_analysis:latest
               command: ["python",  "per_high_low.py"]
-          restartPolicy: OnFailure
+              volumeMounts:
+                - name: local-src
+                  mountPath: /usr/src/app/
+          volumes:
+            - name: local-src
+              hostPath:
+                path: /src/analysis/src

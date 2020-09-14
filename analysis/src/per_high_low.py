@@ -15,14 +15,14 @@ from iexfinance.stocks import Stock
 
 # TODO(olshansky): Generalize this when we have more than one script
 environment = os.getenv('ENVIRONMENT')
-if environment == 'dev':
+if True: # environment == 'dev':
     requests_cache.install_cache('iex_cache')
     IEX_TOKEN = "Tpk_57fa15c2c86b4dadbb31e0c1ad1db895" # This is a test IEX_TOKEN
     os.environ["IEX_API_VERSION"] = "iexcloud-sandbox"
     LAST_SYMBOL_IDX = 10
 else:
     IEX_TOKEN = "pk_5839e587dee649c7a3653e6fbadf7230"
-    LAST_SYMBOL_IDX = -1
+    LAST_SYMBOL_IDX = 10
 
 NUM_BUS_DAYS = 252 # TODO(olshansky): Better way to convert 52 weeks to BUS_DAYS
 MAX_DELTA_PER = 0.2
@@ -106,7 +106,7 @@ def save_daily_results(df):
     ax.axhline(y=df['near_min'].mean(), linestyle='--', color=BLUE)
 
     fig = ax.get_figure()
-    fig.savefig("/market_navigator_data/per_high_low.png")
+    fig.savefig("per_high_low.png")
 
     data = {
         'near_max' : df.iloc[-1].near_max,
@@ -114,7 +114,7 @@ def save_daily_results(df):
         'avg_near_max' : df.iloc[-1].near_min,
         'avg_near_min' : df.iloc[-1].near_min
     }
-    with open('/market_navigator_data/per_high_low.json', 'w') as f:
+    with open('per_high_low.json', 'w') as f:
         json.dump(data, f)
 
 

@@ -12,9 +12,17 @@ spec:
       labels:
         app: api
     spec:
+      volumes:
+        - name: src-pv-storage
+          persistentVolumeClaim:
+            claimName: src-pv-claim
       containers:
       - name: api
-        image: gcr.io/market-navigator-281018/market_navigator_api:a847425
+        image: gcr.io/market-navigator-281018/market_navigator_api:latest
+        volumeMounts:
+          - name: src-pv-storage
+            mountPath: /usr/src/app
+            subPath: api/src
         env:
         - name: PORT
           value: "8080"
