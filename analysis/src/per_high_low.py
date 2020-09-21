@@ -29,6 +29,7 @@ MAX_DELTA_PER = 0.2
 NUM_YEARS_HISTORY = 5
 RED = "#FF0000"
 BLUE = "#0000FF"
+BUCKET_DIR = "/data/market_navigator/static_data"
 
 def is_near_min(delta):
     def is_near_min_internal(row):
@@ -106,7 +107,7 @@ def save_daily_results(df):
     ax.axhline(y=df['near_min'].mean(), linestyle='--', color=BLUE)
 
     fig = ax.get_figure()
-    fig.savefig("per_high_low.png")
+    fig.savefig(f"{BUCKET_DIR}/per_high_low.png")
 
     data = {
         'near_max' : df.iloc[-1].near_max,
@@ -114,21 +115,25 @@ def save_daily_results(df):
         'avg_near_max' : df.iloc[-1].near_min,
         'avg_near_min' : df.iloc[-1].near_min
     }
-    with open('per_high_low.json', 'w') as f:
+    with open(f'{BUCKET_DIR}/per_high_low.json', 'w') as f:
         json.dump(data, f)
 
 
 # Jul 02, 2020: The current Mayer Multiple is 1.09 with a $BTC price of $USD 9,096.67 and a 200 day moving average of $8,357.27 USD. The
 # @TIPMayerMultple
 #  has historically been higher 59.88% of the time with an average of 1.44. Learn more at:
-
-
 def main():
     all_symbols = get_symbols(token=IEX_TOKEN)[:LAST_SYMBOL_IDX]
     (df, df_min, df_max) = get_min_max_dfs(all_symbols)
     df_res = compute_stocks_near_max_min(df_max, df_min)
     save_daily_results(df_res)
 
-
 if __name__ == "__main__":
     main()
+
+# For testing
+# import time
+# def sleep():
+#     time.sleep(100000)
+# if __name__ == "__main__":
+#     sleep()

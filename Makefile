@@ -33,7 +33,9 @@ format_build_args:
 .PHONY: minikube_mount_repo
 ## MK: Start minikube with a local mount.
 minikube_start_with_mount:
-	minikube start --mount-string "$(PWD):/src/" --mount
+	minikube start \
+		--mount-string "$(PWD):/src/" --mount
+	minikube addons enable gcp-auth
 
 ####### GCP #######
 
@@ -111,6 +113,13 @@ analysis_kube_create:
 analysis_job_delete:
 	kubectl delete cronjob analysis
 
+.PHONY: analysis_run
+## Analysis: Run a single job.
+analysis_run:
+	# Dash is included to skip over errors
+	-kubectl delete job analysis-test;
+	kubectl create job --from=cronjob/analysis analysis-test;
+
 .PHONY: analysis_docker_build
 ## Analysis: Build Analysis docker image.
 analysis_docker_build: format_build_args
@@ -131,8 +140,3 @@ analysis_docker_push:
 	$(eval IMAGE:=market_navigator_analysis)
 	eval $$(minikube docker-env) && \
 		docker push $(GCR_HOSTNAME)/$(PROJECT_ID)/$(IMAGE):latest
-
-## Analysis: Run a single job.
-analysis_run:
-	kubectl create -f analysis/cronjob.yaml
-	kubectl create job --from=cronjob/analysis analysis-test

@@ -19,6 +19,7 @@ spec:
       containers:
       - name: api
         image: gcr.io/market-navigator-281018/market_navigator_api:latest
+        imagePullPolicy: IfNotPresent
         volumeMounts:
           - name: src-pv-storage
             mountPath: /usr/src/app

@@ -19,14 +19,27 @@ spec:
             - name: src-pv-storage
               persistentVolumeClaim:
                 claimName: src-pv-claim
-          containers:
-            - name: market-state
-              image: gcr.io/market-navigator-281018/market_navigator_analysis:latest
-              command: ["python",  "per_high_low.py"]
-              volumeMounts:
-                - name: local-src
-                  mountPath: /usr/src/app/
           volumes:
             - name: local-src
               hostPath:
                 path: /src/analysis/src
+          containers:
+            - name: market-state
+              image: gcr.io/market-navigator-281018/market_navigator_analysis:latest
+              imagePullPolicy: IfNotPresent
+              command: ["python",  "per_high_low.py"]
+              securityContext:
+                privileged: true
+                capabilities:
+                  add:
+                    - SYS_ADMIN
+              volumeMounts:
+                - name: local-src
+                  mountPath: /usr/src/app/
+              lifecycle:
+                postStart:
+                  exec:
+                    command: ['sh', '-c', 'gcsfuse market-navigator-static-data /data/market_navigator/static_data']
+                preStop:
+                  exec:
+                    command: ['sh', '-c', 'fusermount -u market-navigator-static-data /data/market_navigator/static_data']

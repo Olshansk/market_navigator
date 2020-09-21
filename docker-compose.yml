@@ -18,6 +18,7 @@ services:
   postgres:
     container_name: postgres
     image: postgres:9.4
+    imagePullPolicy: IfNotPresent
     restart: always
     ports:
       - "5432:5432"
