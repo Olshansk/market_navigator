@@ -1,5 +1,16 @@
-Development Notes (minikube)
-=================
+# [One time] Configuration gCloud
+$ gcloud auth login
+$ gcloud config set project market-navigator
+
+## Create new keys: https://cloud.google.com/iam/docs/creating-managing-service-account-keys
+### Create and download a new key for the `olshansky.daniel@gmail.com` service account
+### Create and download a new key for the `gcr-pull` service account
+$ mkdir -p /Users/olshansky/.kube
+mv ~/Downloads/market-navigator-281018-*.json /Users/olshansky/.kube
+# Update `KEY_FILE` and `DOCKER_PASSWORD_JSON` in the Makefile
+$ make gcloud_auth_docker
+
+# [Start of session] Local development start
 
 $ mk stop
 $ make minikube_start_with_mount
