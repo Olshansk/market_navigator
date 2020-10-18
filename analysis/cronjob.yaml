@@ -28,6 +28,8 @@ spec:
               image: gcr.io/market-navigator-281018/market_navigator_analysis:latest
               imagePullPolicy: IfNotPresent
               command: ["python",  "per_high_low.py"]
+              # command: [ "/bin/bash", "-c", "--" ]
+              # args: [ "while true; do sleep 30; done;" ]
               securityContext:
                 privileged: true
                 capabilities:
