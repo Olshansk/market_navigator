@@ -20,6 +20,9 @@ help:
 # Google Container Registry Parameters
 GCR_HOSTNAME := gcr.io
 PROJECT_ID := market-navigator-281018
+KEY_FILE := /Users/olshansky/.kube/market-navigator-281018-6606d28522f1.json
+DOCKER_PASSWORD_JSON := ~/.kube/market-navigator-281018-128bb21264c6.json
+DOCKER_PASSWORD := $(shell cat ${DOCKER_PASSWORD_JSON})
 
 ####### General #######
 
@@ -30,9 +33,17 @@ format_build_args:
 
 ####### Minikube #######
 
+.PHONY: maybe_start_docker
+maybe_start_docker:
+	docker info > /dev/null || open /Applications/Docker.app
+
+.PHONY: minikube_start_dashboard
+minikube_start_dashboard:
+	nohup minikube dashboard &> /dev/null &
+
 .PHONY: minikube_mount_repo
 ## MK: Start minikube with a local mount.
-minikube_start_with_mount:
+minikube_start_with_mount: maybe_start_docker
 	minikube start \
 		--mount-string "$(PWD):/src/" --mount
 	minikube addons enable gcp-auth
@@ -49,15 +60,12 @@ make_all_volumes:
 gcr_list_images:
 	gcloud container images list-tags
 
-# TODO(olshansky): Get the `kubectl create secret` command working in Makefile.
-DOCKER_PASSWORD_JSON := ~/.kube/market-navigator-281018-0c3841cfff7d.json
-DOCKER_PASSWORD := $(shell cat ${DOCKER_PASSWORD_JSON})
 .PHONY: gcloud_auth_docker
 ## GCP: Authenticate docker related things.
 gcloud_auth_docker:
 	gcloud auth login
 	gcloud config set project $(PROJECT_ID)
-	gcloud auth activate-service-account olshansky-daniel-gmail-com@market-navigator-281018.iam.gserviceaccount.com --key-file=/Users/olshansky/.kube/market-navigator-94b87a9d0d38.json
+	gcloud auth activate-service-account olshansky-daniel-gmail-com@market-navigator-281018.iam.gserviceaccount.com --key-file=$(KEY_FILE)
 	gcloud auth configure-docker
 	kubectl create secret docker-registry gcr-json-key \
           --docker-server=https://gcr.io \
