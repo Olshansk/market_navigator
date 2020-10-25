@@ -15,21 +15,36 @@ from iexfinance.stocks import Stock
 
 # TODO(olshansky): Generalize this when we have more than one script
 environment = os.getenv('ENVIRONMENT')
-if True: # environment == 'dev':
+
+if environment == "PROD":
+    # TODO(olshansky): Update the domain here: https://iexcloud.io/console/tokens
+    IEX_TOKEN = "pk_5839e587dee649c7a3653e6fbadf7230"
+    os.environ["IEX_API_VERSION"] = "iexcloud-v1"
+    LAST_SYMBOL_IDX = -1
+else:
     requests_cache.install_cache('iex_cache')
-    IEX_TOKEN = "Tpk_57fa15c2c86b4dadbb31e0c1ad1db895" # This is a test IEX_TOKEN
+    IEX_TOKEN = "Tpk_57fa15c2c86b4dadbb31e0c1ad1db895"
     os.environ["IEX_API_VERSION"] = "iexcloud-sandbox"
     LAST_SYMBOL_IDX = 10
-else:
-    IEX_TOKEN = "pk_5839e587dee649c7a3653e6fbadf7230"
-    LAST_SYMBOL_IDX = 10
 
-NUM_BUS_DAYS = 252 # TODO(olshansky): Better way to convert 52 weeks to BUS_DAYS
+# Deployment constants.
+BUCKET_DIR = "/data/market_navigator/static_data"
+
+# Analysis constants.
+NUM_BUS_DAYS = 252 # TODO(olshansky): Better way to convert 52 weeks to business days
 MAX_DELTA_PER = 0.2
 NUM_YEARS_HISTORY = 5
+
+# Graph visualization constants.
 RED = "#FF0000"
 BLUE = "#0000FF"
-BUCKET_DIR = "/data/market_navigator/static_data"
+
+
+# The data fro IEX seems to be corrupted and have multiple entries for the same date. Only doing this as a workaround
+# but need to eventually understand why it's happening.
+# https://stackoverflow.com/questions/13035764/remove-rows-with-duplicate-indices-pandas-dataframe-and-timeseries
+def drop_duplicate_indecies(df):
+    return df.loc[~df.index.duplicated(keep='first')]
 
 def is_near_min(delta):
     def is_near_min_internal(row):
@@ -46,12 +61,6 @@ def is_near_max(delta):
         else:
             return abs(row.rolling_max - row.close) / row.close < delta
     return is_near_max_internal
-
-# The data fro IEX seems to be corrupted and have multiple entries for the same date. Only doing this as a workaround
-# but need to eventually understand why it's happening.
-# https://stackoverflow.com/questions/13035764/remove-rows-with-duplicate-indices-pandas-dataframe-and-timeseries
-def drop_duplicate_indecies(df):
-    return df.loc[~df.index.duplicated(keep='first')]
 
 def count_trues(row):
     filtered = [v for v in row.values if (v is not None and not math.isnan(v))]
@@ -119,21 +128,11 @@ def save_daily_results(df):
         json.dump(data, f)
 
 
-# Jul 02, 2020: The current Mayer Multiple is 1.09 with a $BTC price of $USD 9,096.67 and a 200 day moving average of $8,357.27 USD. The
-# @TIPMayerMultple
-#  has historically been higher 59.88% of the time with an average of 1.44. Learn more at:
 def main():
-    all_symbols = get_symbols(token=IEX_TOKEN)[:LAST_SYMBOL_IDX]
-    (df, df_min, df_max) = get_min_max_dfs(all_symbols)
+    symbols = get_symbols(token=IEX_TOKEN)[:LAST_SYMBOL_IDX]
+    (df, df_min, df_max) = get_min_max_dfs(symbols)
     df_res = compute_stocks_near_max_min(df_max, df_min)
     save_daily_results(df_res)
 
 if __name__ == "__main__":
     main()
-
-# For testing
-# import time
-# def sleep():
-#     time.sleep(100000)
-# if __name__ == "__main__":
-#     sleep()

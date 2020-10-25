@@ -31,3 +31,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends gcsfuse
 
 COPY src/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt --no-binary :all
+
+# Copies the code into the work directory above
+COPY src /usr/src/app/

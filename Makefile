@@ -41,11 +41,10 @@ maybe_start_docker:
 minikube_start_dashboard:
 	nohup minikube dashboard &> /dev/null &
 
-.PHONY: minikube_mount_repo
+.PHONY: minikube_start_with_mount
 ## MK: Start minikube with a local mount.
-minikube_start_with_mount: maybe_start_docker
-	minikube start \
-		--mount-string "$(PWD):/src/" --mount
+minikube_start_with_mount:
+	minikube start --mount-string "$(PWD):/src/" --mount
 	minikube addons enable gcp-auth
 
 ####### GCP #######
@@ -110,6 +109,24 @@ api_docker_push:
 		docker push $(GCR_HOSTNAME)/$(PROJECT_ID)/$(IMAGE):latest
 
 ####### Analysis #######
+
+.PHONY: analysis_kube_create_job
+## Delete the analysis cron job config, create a new one, and trigger a job.
+analysis_kube_create_job:
+	kubectl delete cronjob analysis \
+		|| sleep 2 \
+		&& kubectl create -f analysis/cronjob.yaml \
+		&& sleep 2 \
+		&& kubectl create job --from=cronjob/analysis analysis-test
+
+.PHONY: analysis_kube_create_job_local
+## Delete the analysis cron job config, create a new one, and trigger a job.
+analysis_kube_create_job_local:
+	kubectl delete cronjob analysis \
+		|| sleep 2 \
+		&& kubectl create -f analysis/cronjob-local.yaml \
+		&& sleep 2 \
+		&& kubectl create job --from=cronjob/analysis analysis-test
 
 .PHONY: analysis_kube_create
 ## Analysis: Create all Analysis Kubernetes workloads.

@@ -15,23 +15,31 @@ spec:
       template:
         spec:
           restartPolicy: OnFailure
+          volumes:
+            - name: local-src
+              hostPath:
+                path: /src/analysis/src
           containers:
             - name: market-state
               image: gcr.io/market-navigator-281018/market_navigator_analysis:latest
               env:
               - name: ENVIRONMENT
-                value: "PROD"
-              imagePullPolicy: Always
-              command: [ "python", "per_high_low.png"]
+                value: "DEV"
+              imagePullPolicy: IfNotPresent
+              command: [ "/bin/bash", "-c", "--" ]
+              args: [ "while true; do sleep 30; done;" ]
               securityContext:
                 privileged: true
                 capabilities:
                   add:
                     - SYS_ADMIN
+              volumeMounts:
+                - name: local-src
+                  mountPath: /usr/src/app/
               lifecycle:
                 postStart:
                   exec:
-                    command: ['gcsfuse', '-o', 'allow_other', 'market-navigator-static-data', '/data/market_navigator/static_data']
+                    command: ['gcsfuse', '-o', 'nonempty', 'market-navigator-static-data', '/data/market_navigator/static_data']
                 preStop:
                   exec:
                     command: ['fusermount', '-u', '/data/market_navigator/static_data']
