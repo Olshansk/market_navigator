@@ -27,7 +27,8 @@ spec:
                 value: "DEV"
               imagePullPolicy: IfNotPresent
               command: [ "/bin/bash", "-c", "--" ]
-              args: [ "while true; do sleep 30; done;" ]
+              args: [ "sleep 30; nohup python per_high_low.py & tail -f nohup.out" ]
+              # args: [ "while true; do sleep 30; done;"]
               securityContext:
                 privileged: true
                 capabilities:
@@ -39,7 +40,7 @@ spec:
               lifecycle:
                 postStart:
                   exec:
-                    command: ['gcsfuse', '-o', 'nonempty', 'market-navigator-static-data', '/data/market_navigator/static_data']
+                    command: ['gcsfuse', '-o', 'allow_other', 'market-navigator-static-data', '/data/market_navigator/static_data']
                 preStop:
                   exec:
                     command: ['fusermount', '-u', '/data/market_navigator/static_data']

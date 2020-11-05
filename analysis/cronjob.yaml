@@ -22,7 +22,9 @@ spec:
               - name: ENVIRONMENT
                 value: "PROD"
               imagePullPolicy: Always
-              command: [ "python", "per_high_low.png"]
+              # Needs time to mount the gcsfuse directories
+              command: [ "/bin/bash", "-c", "--" ]
+              args: [ "sleep 30; nohup python per_high_low.py & tail -f nohup.out" ]
               securityContext:
                 privileged: true
                 capabilities:

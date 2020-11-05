@@ -5,8 +5,9 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 import json
+import time
 
-from datetime import datetime
+from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
 from iexfinance.refdata import get_symbols, get_iex_symbols, get_symbols
 from iexfinance.stocks import get_historical_data
@@ -16,12 +17,20 @@ from iexfinance.stocks import Stock
 # TODO(olshansky): Generalize this when we have more than one script
 environment = os.getenv('ENVIRONMENT')
 
+# Reference: https://iexcloud.io/docs/api/?gclid=CjwKCAiA4o79BRBvEiwAjteoYP0BtY28kGPakJs9r71RIpoKP_v2OVC1_J_GNRzyUEBQjox_mf-NVxoCE-UQAvD_BwE#request-limits
+# tl;dr 100 requests per second
+RATE_LIMIT_REQUESTS = 100  # Number of requests to make before sleeping
+RATE_LIMIT_SLEEP =  10 # Amount of time to sleep whenever "waiting"
+
 if environment == "PROD":
+    # TODO: Delete from PROD once things work.
+    requests_cache.install_cache('iex_cache')
     # TODO(olshansky): Update the domain here: https://iexcloud.io/console/tokens
     IEX_TOKEN = "pk_5839e587dee649c7a3653e6fbadf7230"
     os.environ["IEX_API_VERSION"] = "iexcloud-v1"
     LAST_SYMBOL_IDX = -1
 else:
+    # TODO: Figure out if URL parameters are taken into account when caching
     requests_cache.install_cache('iex_cache')
     IEX_TOKEN = "Tpk_57fa15c2c86b4dadbb31e0c1ad1db895"
     os.environ["IEX_API_VERSION"] = "iexcloud-sandbox"
@@ -38,7 +47,6 @@ NUM_YEARS_HISTORY = 5
 # Graph visualization constants.
 RED = "#FF0000"
 BLUE = "#0000FF"
-
 
 # The data fro IEX seems to be corrupted and have multiple entries for the same date. Only doing this as a workaround
 # but need to eventually understand why it's happening.
@@ -78,10 +86,15 @@ def get_min_max_dfs(symbols):
     df_max = pd.DataFrame(columns=['date'])
     df_max.set_index('date', inplace=True)
 
+    num_requests_since_last_sleep = 0
+
     for symbol_metadata in symbols:
         symbol = symbol_metadata['symbol']
         try:
             df = get_historical_data(symbol, start_date, end_date, close_only=True, output_format='pandas', token=IEX_TOKEN)
+            num_requests_since_last_sleep += 1
+            if num_requests_since_last_sleep > RATE_LIMIT_REQUESTS:
+                time.sleep(RATE_LIMIT_SLEEP)
 
             # TODO: Remove this eventually once iex or python module fixes things...
             df = drop_duplicate_indecies(df)
@@ -95,11 +108,13 @@ def get_min_max_dfs(symbols):
             df_min[min_key] = df.apply(is_near_min(MAX_DELTA_PER), axis=1)
             df_max[max_key] = df.apply(is_near_max(MAX_DELTA_PER), axis=1)
 
+            print(f"Successfully processed {symbol}", flush=True)
         except Exception as e:
-            print(f"Failed to process {symbol}: {e}")
+            print(f"Failed to process {symbol}: {e}.", flush=True)
 
     return (df, df_min, df_max)
 
+# TODO: Remind yourself how this work by running it in a notebook.
 def compute_stocks_near_max_min(df_max, df_min):
     df_res = pd.DataFrame(columns=['date'])
     df_res.set_index('date', inplace=True)
@@ -115,8 +130,11 @@ def save_daily_results(df):
     ax.axhline(y=df['near_max'].mean(), linestyle='--', color=RED)
     ax.axhline(y=df['near_min'].mean(), linestyle='--', color=BLUE)
 
+    curr_date = "{:%Y_%m_%d}".format(datetime.now())
+
     fig = ax.get_figure()
-    fig.savefig(f"{BUCKET_DIR}/per_high_low.png")
+    fig.savefig(f"{BUCKET_DIR}/per_high_low_{curr_date}.png")
+    fig.savefig(f"{BUCKET_DIR}/per_high_low_latest.png")
 
     data = {
         'near_max' : df.iloc[-1].near_max,
@@ -124,15 +142,20 @@ def save_daily_results(df):
         'avg_near_max' : df.iloc[-1].near_min,
         'avg_near_min' : df.iloc[-1].near_min
     }
-    with open(f'{BUCKET_DIR}/per_high_low.json', 'w') as f:
+    with open(f'{BUCKET_DIR}/per_high_low_{curr_date}.json', 'w') as f:
         json.dump(data, f)
-
+    with open(f'{BUCKET_DIR}/per_high_low_latest.json', 'w') as f:
+        json.dump(data, f)
 
 def main():
     symbols = get_symbols(token=IEX_TOKEN)[:LAST_SYMBOL_IDX]
+    print("DONE retrieving symbols", flush=True)
     (df, df_min, df_max) = get_min_max_dfs(symbols)
+    print("DONE computing dfs", flush=True)
     df_res = compute_stocks_near_max_min(df_max, df_min)
+    print("DONE computing min & max", flush=True)
     save_daily_results(df_res)
+    print("DONE saving results.", flush=True)
 
 if __name__ == "__main__":
     main()
