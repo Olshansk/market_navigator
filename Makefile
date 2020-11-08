@@ -44,6 +44,7 @@ minikube_start_dashboard:
 .PHONY: minikube_start_with_mount
 ## MK: Start minikube with a local mount.
 minikube_start_with_mount:
+	# minikube start --mount-string "$(PWD):/src/" --mount --driver=docker
 	minikube start --mount-string "$(PWD):/src/" --mount
 	minikube addons enable gcp-auth
 
@@ -73,6 +74,14 @@ gcloud_auth_docker:
           --docker-email=olshansky.daniel@gmail.com
 	kubectl patch serviceaccount default \
           -p '{"imagePullSecrets": [{"name": "gcr-json-key"}]}'
+
+.PHONY: gcloud_create_cluster
+# Create a kube cluster with the proper permissions.
+gcloud_create_cluster:
+	gcloud container clusters create market-navigator \
+	--zone us-west1-a \
+	--node-locations us-west1-a \
+	--scopes=default,bigquery,cloud-platform,compute-rw,datastore,storage-full,taskqueue,userinfo-email,sql-admin
 
 ####### API #######
 
@@ -113,8 +122,7 @@ api_docker_push:
 .PHONY: analysis_kube_create_job
 ## Delete the analysis cron job config, create a new one, and trigger a job.
 analysis_kube_create_job:
-	kubectl delete cronjob analysis \
-		|| sleep 2 \
+	kubectl delete cronjob analysis || sleep 2 \
 		&& kubectl create -f analysis/cronjob.yaml \
 		&& sleep 2 \
 		&& kubectl create job --from=cronjob/analysis analysis-test
@@ -122,8 +130,7 @@ analysis_kube_create_job:
 .PHONY: analysis_kube_create_job_local
 ## Delete the analysis cron job config, create a new one, and trigger a job.
 analysis_kube_create_job_local:
-	kubectl delete cronjob analysis \
-		|| sleep 2 \
+	kubectl delete cronjob analysis || sleep 2 \
 		&& kubectl create -f analysis/cronjob-local.yaml \
 		&& sleep 2 \
 		&& kubectl create job --from=cronjob/analysis analysis-test

@@ -5,7 +5,8 @@ metadata:
   labels:
     job: analysis
 spec:
-  schedule: "0 0 * * *"
+  ## Weekly cron schedule. Change to daily once I upgrade to a paid plan.
+  schedule: "0 0 * * 0"
   concurrencyPolicy: "Forbid"
   suspend: true
   failedJobsHistoryLimit: 3
@@ -21,8 +22,10 @@ spec:
               env:
               - name: ENVIRONMENT
                 value: "PROD"
-              imagePullPolicy: Always
-              command: [ "python", "per_high_low.png"]
+              imagePullPolicy: IfNotPresent
+              command: [ "/bin/bash", "-c", "--" ]
+              ## Sleep is added to allow gcsfuse sufficient time to configure.
+              args: [ "sleep 15; nohup python per_high_low.py " ]
               securityContext:
                 privileged: true
                 capabilities:

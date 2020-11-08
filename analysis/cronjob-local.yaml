@@ -5,7 +5,8 @@ metadata:
   labels:
     job: analysis
 spec:
-  schedule: "0 0 * * *"
+  ## Weekly cron schedule. Change to daily once I upgrade to a paid plan.
+  schedule: "0 0 * * 0"
   concurrencyPolicy: "Forbid"
   suspend: true
   failedJobsHistoryLimit: 3
@@ -27,7 +28,12 @@ spec:
                 value: "DEV"
               imagePullPolicy: IfNotPresent
               command: [ "/bin/bash", "-c", "--" ]
-              args: [ "while true; do sleep 30; done;" ]
+              ## Sleep is added to allow gcsfuse sufficient time to configure.
+              args: [ "sleep 15; nohup python per_high_low.py " ]
+              ## Args below can be used to redirect the output not to stdout.
+              # args: [ "sleep 15; nohup python per_high_low.py > /data/market_navigator/static_data/dev_analysis_logs.out 2>&1 " ]
+              ## Args below are useful for testing:
+              # args: [ "while true; do sleep 30; done;"]
               securityContext:
                 privileged: true
                 capabilities:
@@ -39,7 +45,7 @@ spec:
               lifecycle:
                 postStart:
                   exec:
-                    command: ['gcsfuse', '-o', 'nonempty', 'market-navigator-static-data', '/data/market_navigator/static_data']
+                    command: ['gcsfuse', '-o', 'allow_other', 'market-navigator-static-data', '/data/market_navigator/static_data']
                 preStop:
                   exec:
                     command: ['fusermount', '-u', '/data/market_navigator/static_data']
