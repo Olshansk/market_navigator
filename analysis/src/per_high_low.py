@@ -22,7 +22,10 @@ environment = os.getenv('ENVIRONMENT')
 RATE_LIMIT_REQUESTS = 100  # Number of requests to make before sleeping
 RATE_LIMIT_SLEEP =  10 # Amount of time to sleep whenever "waiting"
 
-if environment == "PROD":
+def is_prod():
+    return environment == "PROD"
+
+if is_prod():
     # TODO: Delete from PROD once things work.
     requests_cache.install_cache('iex_cache')
     # TODO(olshansky): Update the domain here: https://iexcloud.io/console/tokens
@@ -132,9 +135,11 @@ def save_daily_results(df):
 
     curr_date = "{:%Y_%m_%d}".format(datetime.now())
 
+    env_prefix = "" if is_prod() else "dev_"
+
     fig = ax.get_figure()
-    fig.savefig(f"{BUCKET_DIR}/per_high_low_{curr_date}.png")
-    fig.savefig(f"{BUCKET_DIR}/per_high_low_latest.png")
+    fig.savefig(f"{BUCKET_DIR}/{env_prefix}per_high_low_{curr_date}.png")
+    fig.savefig(f"{BUCKET_DIR}/{env_prefix}per_high_low_latest.png")
 
     data = {
         'near_max' : df.iloc[-1].near_max,
@@ -142,9 +147,9 @@ def save_daily_results(df):
         'avg_near_max' : df.iloc[-1].near_min,
         'avg_near_min' : df.iloc[-1].near_min
     }
-    with open(f'{BUCKET_DIR}/per_high_low_{curr_date}.json', 'w') as f:
+    with open(f'{BUCKET_DIR}/{env_prefix}per_high_low_{curr_date}.json', 'w') as f:
         json.dump(data, f)
-    with open(f'{BUCKET_DIR}/per_high_low_latest.json', 'w') as f:
+    with open(f'{BUCKET_DIR}/{env_prefix}per_high_low_latest.json', 'w') as f:
         json.dump(data, f)
 
 def main():
