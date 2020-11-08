@@ -10,14 +10,27 @@ chrome.runtime.onMessage.addListener(
 
 
 function updateMarketState() {
-  console.log("Calling updateMarketState");
-  fetch('http://localhost:8080/market_state')
-    .then(r => r.json())
-    .then(result => {
-      $('#topStocksLabel').text(result['top_stocks_label']);
-      $('#bottomStocksLabel').text(result['bottom_stocks_label']);
-    });
+ console.log("Calling updateMarketState");
+ fetch('https://storage.googleapis.com/market-navigator-static-data/per_high_low_latest.json')
+   .then(r => r.json())
+   .then(result => {
+     let MAX_DELTA_PER = 0.2;
+     let top_stocks_label = `${Math.round(result['near_max'] * 100)}% of stocks on the market are within ${Math.round(MAX_DELTA_PER * 100)}% percent of their 52 week MAXIMUM, compared to an average of ${Math.round(result['avg_near_max'] * 100)}%.`;
+     let bottom_stocks_label = `${Math.round(result['near_min'] * 100)}% of stocks on the market are within ${Math.round(MAX_DELTA_PER * 100)}% percent of their 52 week MINIMUM, compared to an average of ${Math.round(result['avg_near_min'] * 100)}%.`;
+     $('#topStocksLabel').text(top_stocks_label);
+     $('#bottomStocksLabel').text(bottom_stocks_label);
+   });
 }
+
+// function updateMarketState() {
+//   console.log("Calling updateMarketState");
+//   fetch('http://localhost:8080/market_state')
+//     .then(r => r.json())
+//     .then(result => {
+//       $('#topStocksLabel').text(result['top_stocks_label']);
+//       $('#bottomStocksLabel').text(result['bottom_stocks_label']);
+//     });
+// }
 
 $(function() {
   // Load data on startup

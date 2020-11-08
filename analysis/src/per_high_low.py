@@ -9,7 +9,7 @@ import time
 
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
-from iexfinance.refdata import get_symbols, get_iex_symbols, get_symbols
+from iexfinance.refdata import get_symbols, get_iex_symbols
 from iexfinance.stocks import get_historical_data
 from iexfinance.altdata import get_social_sentiment
 from iexfinance.stocks import Stock
@@ -25,15 +25,13 @@ RATE_LIMIT_SLEEP =  10 # Amount of time to sleep whenever "waiting"
 def is_prod():
     return environment == "PROD"
 
+# Track usage here: https://iexcloud.io/console/usage
 if is_prod():
-    # TODO: Delete from PROD once things work.
-    requests_cache.install_cache('iex_cache')
-    # TODO(olshansky): Update the domain here: https://iexcloud.io/console/tokens
-    IEX_TOKEN = "pk_5839e587dee649c7a3653e6fbadf7230"
+    # IEX_TOKEN = "pk_5839e587dee649c7a3653e6fbadf7230"
+    IEX_TOKEN = "pk_65445a57104144ba89098f6e7974b1e0"
     os.environ["IEX_API_VERSION"] = "iexcloud-v1"
     LAST_SYMBOL_IDX = -1
 else:
-    # TODO: Figure out if URL parameters are taken into account when caching
     requests_cache.install_cache('iex_cache')
     IEX_TOKEN = "Tpk_57fa15c2c86b4dadbb31e0c1ad1db895"
     os.environ["IEX_API_VERSION"] = "iexcloud-sandbox"
