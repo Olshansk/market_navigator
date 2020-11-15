@@ -26,9 +26,11 @@ def is_prod():
     return environment == "PROD"
 
 # Track usage here: https://iexcloud.io/console/usage
-if is_prod():
+# if is_prod():
+if True:
     # IEX_TOKEN = "pk_5839e587dee649c7a3653e6fbadf7230"
-    IEX_TOKEN = "pk_65445a57104144ba89098f6e7974b1e0"
+    # IEX_TOKEN = "pk_65445a57104144ba89098f6e7974b1e0"
+    IEX_TOKEN = "pk_805e84401d6d415b861971b5e95ba705"
     os.environ["IEX_API_VERSION"] = "iexcloud-v1"
     LAST_SYMBOL_IDX = -1
 else:

@@ -172,3 +172,10 @@ analysis_docker_push:
 	$(eval IMAGE:=market_navigator_analysis)
 	eval $$(minikube docker-env) && \
 		docker push $(GCR_HOSTNAME)/$(PROJECT_ID)/$(IMAGE):latest
+
+####### Chrome Extension #######
+
+.PHONY: chrome_extension_zip
+## Zip up the chrome extension
+chrome_extension_zip:
+	zip -r market_navigator.zip chrome_extension

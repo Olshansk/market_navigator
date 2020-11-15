@@ -1,16 +1,8 @@
 {
     "name": "Market Navigator",
-    "version": "1.0",
+    "version": "0.0.0.1",
     "description": "Notifications and tools to navigate a turbulent market.",
     "permissions": [
-      "activeTab",
-      "declarativeContent",
-      "storage",
-      "http://*/*",
-      "https://*/*",
-      "<all_urls>",
-      "contextMenus",
-      "tabs"
     ],
     "web_accessible_resources": [
       "css/content_script.css",
@@ -24,7 +16,7 @@
       ]
     },
     "content_scripts": [{
-      "matches": ["*://*/*"],
+      "matches": ["http://*/*", "https://*/*"],
       "js": [
         "js/content_script.js"
       ],
@@ -49,6 +41,5 @@
       "32": "images/icon32.png",
       "128": "images/icon128.png"
     },
-    "manifest_version": 2,
-    "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAn7EVH4CiBaFiDm63wqRAif5xXnT2bCHNTVK1GPlkN0K9rjr0GMXu0fbBLgFYzFNRlMfkCWA7EO53ZqeSqFSxSHCN4zkLsALsIM6brBDCWfh3DDCHPam6X8muNH50su1gRd4pb+ksODrpMZyx6lWbgzkIo5GD/jL3av87U+ej+wa/7s6mXNsN4gTnuz9tMbjHnTQSlpRYBseJYZ+YrPALrIBHpggYuK0vQnO1n3xPORdqn4b3BDYkRHpw6apBTCMk4uXO1yVYMCNTo7Via0d0FeemJa1vvISRU2p+AydPqhxFPqrfKblnWzTeWyttpN/81DexiZGpLFWukKiBdt2r+wIDAQAB"
+    "manifest_version": 2
   }
