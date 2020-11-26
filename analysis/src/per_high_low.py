@@ -100,7 +100,7 @@ def get_min_max_dfs(symbols):
                 time.sleep(RATE_LIMIT_SLEEP)
 
             # TODO: Remove this eventually once iex or python module fixes things...
-            df = drop_duplicate_indecies(df)
+            # df = drop_duplicate_indecies(df)
 
             df['rolling_max'] = df['close'].rolling(window=NUM_BUS_DAYS, min_periods=NUM_BUS_DAYS).max()
             df['rolling_min'] = df['close'].rolling(window=NUM_BUS_DAYS, min_periods=NUM_BUS_DAYS).min()
