@@ -2,7 +2,8 @@ certifi==2020.6.20
 chardet==3.0.4
 cycler==0.10.0
 idna==2.10
-iexfinance==0.4.3
+git+https://github.com/addisonlynch/iexfinance@b23c0646f614c84dc32750aee3bbb3cf10afbe35#egg=iexfinance
+tables==3.6.1
 kiwisolver==1.2.0
 matplotlib==3.3.2
 numpy==1.19.2

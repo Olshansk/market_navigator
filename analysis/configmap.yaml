@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: analysis-config
+  namespace: default
+data:
+  IEX_TOKEN: "pk_b4705c60d5e248d687897b142e4a5e89"
+  NUM_YEARS_HISTORY: "1"
+  LAST_SYMBOL_IDX: "10"

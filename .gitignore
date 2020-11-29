@@ -1,3 +1,6 @@
 .DS_Store
+store.h5
 api/app/__pycache__/
+per_high_low_*.json
 market_navigator.zip
+__pycache__/

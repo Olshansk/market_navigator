@@ -119,9 +119,14 @@ api_docker_push:
 
 ####### Analysis #######
 
+.PHONY: analysis_kube_create_cf
+## Create the configmap for the analysis job
+analysis_kube_create_cf:
+	kubectl apply -f analysis/configmap.yaml
+
 .PHONY: analysis_kube_create_job
 ## Delete the analysis cron job config, create a new one, and trigger a job.
-analysis_kube_create_job:
+analysis_kube_create_job: analysis_kube_create_cf
 	kubectl delete cronjob analysis || sleep 2 \
 		&& kubectl create -f analysis/cronjob.yaml \
 		&& sleep 2 \
@@ -129,10 +134,16 @@ analysis_kube_create_job:
 
 .PHONY: analysis_kube_create_job_local
 ## Delete the analysis cron job config, create a new one, and trigger a job.
-analysis_kube_create_job_local:
+analysis_kube_create_job_local: analysis_kube_create_cf
 	kubectl delete cronjob analysis || sleep 2 \
 		&& kubectl create -f analysis/cronjob-local.yaml \
 		&& sleep 2 \
+		&& kubectl create job --from=cronjob/analysis analysis-test
+
+.PHONY: analysis_kube_restart_job
+## Delete and restart a single instance of the analysis job.
+analysis_kube_restart_test_job:
+	kubectl delete job analysis-test || sleep 2 \
 		&& kubectl create job --from=cronjob/analysis analysis-test
 
 .PHONY: analysis_kube_create

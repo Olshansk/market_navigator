@@ -22,10 +22,26 @@ spec:
               env:
               - name: ENVIRONMENT
                 value: "PROD"
+              - name: NUM_YEARS_HISTORY
+                valueFrom:
+                  configMapKeyRef:
+                    name: analysis-config
+                    key: NUM_YEARS_HISTORY
+              - name: IEX_TOKEN
+                valueFrom:
+                  configMapKeyRef:
+                    name: analysis-config
+                    key: IEX_TOKEN
+              - name: LAST_SYMBOL_IDX
+                valueFrom:
+                  configMapKeyRef:
+                    name: analysis-config
+                    key: LAST_SYMBOL_IDX
               imagePullPolicy: Always
               command: [ "/bin/bash", "-c", "--" ]
               ## Sleep is added to allow gcsfuse sufficient time to configure.
-              args: [ "sleep 15; nohup python per_high_low.py " ]
+              args: [ "sleep 15; nohup python per_high_low.py" ]
+              # args: [ "while true; do sleep 30; done;"]
               securityContext:
                 privileged: true
                 capabilities:

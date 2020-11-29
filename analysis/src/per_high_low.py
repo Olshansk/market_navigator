@@ -1,3 +1,4 @@
+import sys
 import os
 import requests_cache
 import pandas as pd
@@ -6,6 +7,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import json
 import time
+import warnings
+import tables
 
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
@@ -13,31 +16,12 @@ from iexfinance.refdata import get_symbols, get_iex_symbols
 from iexfinance.stocks import get_historical_data
 from iexfinance.altdata import get_social_sentiment
 from iexfinance.stocks import Stock
-
-# TODO(olshansky): Generalize this when we have more than one script
-environment = os.getenv('ENVIRONMENT')
+from iex_helpers.caching import get_historical_data_cached
 
 # Reference: https://iexcloud.io/docs/api/?gclid=CjwKCAiA4o79BRBvEiwAjteoYP0BtY28kGPakJs9r71RIpoKP_v2OVC1_J_GNRzyUEBQjox_mf-NVxoCE-UQAvD_BwE#request-limits
 # tl;dr 100 requests per second
 RATE_LIMIT_REQUESTS = 100  # Number of requests to make before sleeping
 RATE_LIMIT_SLEEP =  10 # Amount of time to sleep whenever "waiting"
-
-def is_prod():
-    return environment == "PROD"
-
-# Track usage here: https://iexcloud.io/console/usage
-# if is_prod():
-if True:
-    # IEX_TOKEN = "pk_5839e587dee649c7a3653e6fbadf7230"
-    # IEX_TOKEN = "pk_65445a57104144ba89098f6e7974b1e0"
-    IEX_TOKEN = "pk_805e84401d6d415b861971b5e95ba705"
-    os.environ["IEX_API_VERSION"] = "iexcloud-v1"
-    LAST_SYMBOL_IDX = -1
-else:
-    requests_cache.install_cache('iex_cache')
-    IEX_TOKEN = "Tpk_57fa15c2c86b4dadbb31e0c1ad1db895"
-    os.environ["IEX_API_VERSION"] = "iexcloud-sandbox"
-    LAST_SYMBOL_IDX = 10
 
 # Deployment constants.
 BUCKET_DIR = "/data/market_navigator/static_data"
@@ -45,11 +29,30 @@ BUCKET_DIR = "/data/market_navigator/static_data"
 # Analysis constants.
 NUM_BUS_DAYS = 252 # TODO(olshansky): Better way to convert 52 weeks to business days
 MAX_DELTA_PER = 0.2
-NUM_YEARS_HISTORY = 5
 
 # Graph visualization constants.
 RED = "#FF0000"
 BLUE = "#0000FF"
+
+def is_prod():
+    return os.getenv('ENVIRONMENT') == "PROD"
+
+# Track usage here: https://iexcloud.io/console/usage
+if is_prod():
+    store = pd.HDFStore(f'{BUCKET_DIR}/iex_store.h5')
+    os.environ["IEX_API_VERSION"] = "iexcloud-v1"
+    LAST_SYMBOL_IDX = int(os.getenv('LAST_SYMBOL_IDX'))
+    IEX_TOKEN = os.getenv("IEX_TOKEN")
+    NUM_YEARS_HISTORY = int(os.getenv('NUM_YEARS_HISTORY'))
+    if NUM_YEARS_HISTORY is None:
+        sys.exit('NUM_YEARS_HISTORY is not set')
+else:
+    store = pd.HDFStore(f'{BUCKET_DIR}/dev_iex_store.h5')
+    requests_cache.install_cache('iex_cache')
+    os.environ["IEX_API_VERSION"] = "iexcloud-sandbox"
+    LAST_SYMBOL_IDX = 2
+    IEX_TOKEN = "Tpk_57fa15c2c86b4dadbb31e0c1ad1db895"
+    NUM_YEARS_HISTORY = 4
 
 # The data fro IEX seems to be corrupted and have multiple entries for the same date. Only doing this as a workaround
 # but need to eventually understand why it's happening.
@@ -91,12 +94,14 @@ def get_min_max_dfs(symbols):
 
     num_requests_since_last_sleep = 0
 
-    for symbol_metadata in symbols:
+    for _, symbol_metadata in symbols.iterrows():
         symbol = symbol_metadata['symbol']
         try:
-            df = get_historical_data(symbol, start_date, end_date, close_only=True, output_format='pandas', token=IEX_TOKEN)
+            # df = get_historical_data(symbol, start_date, end_date, close_only=True, output_format='pandas', token=IEX_TOKEN)
+            df = get_historical_data_cached(store, symbol, start_date, end_date, close_only=True, output_format='pandas', token=IEX_TOKEN)
             num_requests_since_last_sleep += 1
             if num_requests_since_last_sleep > RATE_LIMIT_REQUESTS:
+                store.flush(fsync=True)
                 time.sleep(RATE_LIMIT_SLEEP)
 
             # TODO: Remove this eventually once iex or python module fixes things...
@@ -115,7 +120,7 @@ def get_min_max_dfs(symbols):
         except Exception as e:
             print(f"Failed to process {symbol}: {e}.", flush=True)
 
-    return (df, df_min, df_max)
+    return (df_min, df_max)
 
 # TODO: Remind yourself how this work by running it in a notebook.
 def compute_stocks_near_max_min(df_max, df_min):
@@ -147,6 +152,7 @@ def save_daily_results(df):
         'avg_near_max' : df.iloc[-1].near_min,
         'avg_near_min' : df.iloc[-1].near_min
     }
+
     with open(f'{BUCKET_DIR}/{env_prefix}per_high_low_{curr_date}.json', 'w') as f:
         json.dump(data, f)
     with open(f'{BUCKET_DIR}/{env_prefix}per_high_low_latest.json', 'w') as f:
@@ -155,7 +161,12 @@ def save_daily_results(df):
 def main():
     symbols = get_symbols(token=IEX_TOKEN)[:LAST_SYMBOL_IDX]
     print("DONE retrieving symbols", flush=True)
-    (df, df_min, df_max) = get_min_max_dfs(symbols)
+    (df_min, df_max) = get_min_max_dfs(symbols)
+    try:
+        store.close()
+        print("Successfully closed `store` file.")
+    except Exception as e:
+        print("Error close `store` file:", e)
     print("DONE computing dfs", flush=True)
     df_res = compute_stocks_near_max_min(df_max, df_min)
     print("DONE computing min & max", flush=True)
@@ -163,4 +174,8 @@ def main():
     print("DONE saving results.", flush=True)
 
 if __name__ == "__main__":
-    main()
+    with warnings.catch_warnings():
+        # This happens when we try to save a symbol such as 'AAIC-B' in the HDF5 store
+        # More details here: https://stackoverflow.com/questions/58414068/how-to-get-rid-of-naturalnamewarning
+        warnings.filterwarnings("ignore", category=tables.NaturalNameWarning)
+        main()

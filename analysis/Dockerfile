@@ -19,7 +19,7 @@ RUN mkdir -p /data/market_navigator/static_data
 # Reference: https://runnable.com/blog/9-common-dockerfile-mistakes
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-      curl gnupg2 && \
+      curl gnupg2 git && \
     rm -rf /var/lib/apt/lists/*
 
 # Prepare GCSFuse installation: https://www.opcito.com/blogs/Introduction-to-persistent-volumes-and-mounting-gcp-buckets-on-containers/
