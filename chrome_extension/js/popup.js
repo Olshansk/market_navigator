@@ -11,7 +11,7 @@ chrome.runtime.onMessage.addListener(
 
 function updateMarketState() {
  console.log("Calling updateMarketState");
- fetch('https://storage.googleapis.com/market-navigator-static-data/per_high_low_latest.json')
+ fetch('https://storage.googleapis.com/market-navigator-data/per_high_low_latest.json')
    .then(r => r.json())
    .then(result => {
      let MAX_DELTA_PER = 0.2;

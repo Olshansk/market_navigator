@@ -46,8 +46,8 @@ spec:
               lifecycle:
                 postStart:
                   exec:
-                    command: ['gcsfuse', '-o', 'allow_other', 'market-navigator-static-data', '/data/market_navigator/static_data']
-                    # For debugging: gcsfuse -o allow_other -o nonempty --foreground --debug_fuse market-navigator-static-data /data/market_navigator/static_data
+                    command: ['gcsfuse', '-o', 'allow_other', 'market-navigator-data', '/data/market_navigator/static_data']
+                    # For debugging: gcsfuse -o allow_other -o nonempty --foreground --debug_fuse market-navigator-data /data/market_navigator/static_data
                 preStop:
                   exec:
                     command: ['fusermount', '-u', '/data/market_navigator/static_data']
