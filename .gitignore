@@ -4,3 +4,5 @@ api/app/__pycache__/
 per_high_low_*.json
 market_navigator.zip
 __pycache__/
+dev_per_high_low_*.png
+core
