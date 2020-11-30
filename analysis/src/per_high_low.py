@@ -45,7 +45,9 @@ if is_prod():
     IEX_TOKEN = os.getenv("IEX_TOKEN")
     NUM_YEARS_HISTORY = int(os.getenv('NUM_YEARS_HISTORY'))
     if NUM_YEARS_HISTORY is None:
-        sys.exit('NUM_YEARS_HISTORY is not set')
+        # sys.exit('NUM_YEARS_HISTORY is not set')
+        print('NUM_YEARS_HISTORY is nto set so using 3 days instead')
+        NUM_DAYS_HISTORY = 3
 else:
     store = pd.HDFStore(f'{BUCKET_DIR}/dev_iex_store.h5')
     requests_cache.install_cache('iex_cache')
@@ -84,7 +86,11 @@ def count_trues(row):
 
 def get_min_max_dfs(symbols):
     end_date = datetime.now()
-    start_date = end_date - relativedelta(years=NUM_YEARS_HISTORY)
+
+    if NUM_YEARS_HISTORY is None:
+        start_date = end_date - relativedelta(days=NUM_DAYS_HISTORY)
+    else:
+        start_date = end_date - relativedelta(years=NUM_YEARS_HISTORY)
 
     df_min = pd.DataFrame(columns=['date'])
     df_min.set_index('date', inplace=True)
