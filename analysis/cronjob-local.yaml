@@ -24,6 +24,8 @@ spec:
             - name: market-state
               image: gcr.io/market-navigator-281018/market_navigator_analysis:latest
               env:
+              - name: IEX_LOG_LEVEL
+                value: "DEBUG"
               - name: ENVIRONMENT
                 value: "DEV"
               imagePullPolicy: IfNotPresent

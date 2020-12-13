@@ -52,7 +52,7 @@ else:
     store = pd.HDFStore(f'{BUCKET_DIR}/dev_iex_store.h5')
     requests_cache.install_cache('iex_cache')
     os.environ["IEX_API_VERSION"] = "iexcloud-sandbox"
-    LAST_SYMBOL_IDX = 2
+    LAST_SYMBOL_IDX = 11
     IEX_TOKEN = "Tpk_57fa15c2c86b4dadbb31e0c1ad1db895"
     NUM_YEARS_HISTORY = 4
 
