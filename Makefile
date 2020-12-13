@@ -75,13 +75,19 @@ gcloud_auth_docker:
 	kubectl patch serviceaccount default \
           -p '{"imagePullSecrets": [{"name": "gcr-json-key"}]}'
 
+# Aims to use the free tier: https://github.com/Neutrollized/free-tier-gke
+# Free tiers can be found here: https://cloud.google.com/free
+# This should be cheap ($5/month?)
 .PHONY: gcloud_create_cluster
-# Create a kube cluster with the proper permissions.
+## Create a kube cluster with the proper permissions.
 gcloud_create_cluster:
 	gcloud container clusters create market-navigator \
 	--zone us-west1-a \
 	--node-locations us-west1-a \
-	--scopes=default,bigquery,cloud-platform,compute-rw,datastore,storage-full,taskqueue,userinfo-email,sql-admin
+	--scopes=default,bigquery,cloud-platform,compute-rw,datastore,storage-full,taskqueue,userinfo-email,sql-admin \
+	--machine-type=e2-small \
+	--max-nodes=1 \
+	--num-nodes=1
 
 ####### API #######
 
