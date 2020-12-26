@@ -48,6 +48,7 @@ if is_prod():
         print('NUM_YEARS_HISTORY is not set so using 3 days instead')
         NUM_DAYS_HISTORY = 3
     END_DATE_OFFSET = int(os.getenv('END_DATE_OFFSET', "0"))
+    print('END_DATE_OFFSET:', END_DATE_OFFSET)
 else:
     store = pd.HDFStore(f'{BUCKET_DIR}/dev_iex_store.h5')
     requests_cache.install_cache('iex_cache')
@@ -87,7 +88,6 @@ def count_trues(row):
 
 def get_min_max_dfs(symbols):
     end_date = datetime.now() - relativedelta(days=END_DATE_OFFSET)
-
     if NUM_YEARS_HISTORY is None:
         start_date = end_date - relativedelta(days=NUM_DAYS_HISTORY)
     else:
