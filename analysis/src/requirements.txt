@@ -3,7 +3,7 @@ chardet==3.0.4
 cycler==0.10.0
 idna==2.10
 # git+https://github.com/addisonlynch/iexfinance@b23c0646f614c84dc32750aee3bbb3cf10afbe35#egg=iexfinance
-iexfinance==0.5.0
+iexfinance=0.5.0
 tables==3.6.1
 kiwisolver==1.2.0
 matplotlib==3.3.2
