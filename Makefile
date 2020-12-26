@@ -89,6 +89,11 @@ gcloud_create_cluster:
 	--max-nodes=1 \
 	--num-nodes=1
 
+.PHONY: gcloud_get_creds
+## Get GKE credentials for the cluster.
+gcloud_get_creds:
+	gcloud container clusters get-credentials market-navigator --zone us-west1-a
+
 ####### API #######
 
 .PHONY: api_kube_create

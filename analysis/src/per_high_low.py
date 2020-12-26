@@ -47,7 +47,7 @@ if is_prod():
     if NUM_YEARS_HISTORY is None:
         print('NUM_YEARS_HISTORY is not set so using 3 days instead')
         NUM_DAYS_HISTORY = 3
-    END_DATE_OFFSET = int(os.getenv('NUM_YEARS_HISTORY', "0"))
+    END_DATE_OFFSET = int(os.getenv('END_DATE_OFFSET', "0"))
 else:
     store = pd.HDFStore(f'{BUCKET_DIR}/dev_iex_store.h5')
     requests_cache.install_cache('iex_cache')
