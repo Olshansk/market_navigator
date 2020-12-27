@@ -6,8 +6,9 @@ metadata:
 data:
   IEX_TOKEN: "pk_5839e587dee649c7a3653e6fbadf7230"
   NUM_YEARS_HISTORY: "14"
-  LAST_SYMBOL_IDX: "4"
-  END_DATE_OFFSET: "60"
+  FIRST_SYMBOL_IDX: "999"
+  LAST_SYMBOL_IDX: "2000"
+  END_DATE_OFFSET: "0"
 
 # olshansky.daniel.november: pk_805e84401d6d415b861971b5e95ba705
 # olshansky.daniel.freegcp: pk_65445a57104144ba89098f6e7974b1e0

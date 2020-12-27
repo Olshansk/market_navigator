@@ -37,6 +37,16 @@ spec:
                   configMapKeyRef:
                     name: analysis-config
                     key: LAST_SYMBOL_IDX
+              - name: FIRST_SYMBOL_IDX
+                valueFrom:
+                  configMapKeyRef:
+                    name: analysis-config
+                    key: FIRST_SYMBOL_IDX
+              - name: END_DATE_OFFSET
+                valueFrom:
+                  configMapKeyRef:
+                    name: analysis-config
+                    key: END_DATE_OFFSET
               imagePullPolicy: Always
               command: [ "/bin/bash", "-c", "--" ]
               ## Sleep is added to allow gcsfuse sufficient time to configure.

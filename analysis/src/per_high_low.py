@@ -41,6 +41,7 @@ def is_prod():
 if is_prod():
     store = pd.HDFStore(f'{BUCKET_DIR}/iex_store.h5')
     os.environ["IEX_API_VERSION"] = "iexcloud-v1"
+    FIRST_SYMBOL_IDX = int(os.getenv('FIRST_SYMBOL_IDX'))
     LAST_SYMBOL_IDX = int(os.getenv('LAST_SYMBOL_IDX'))
     IEX_TOKEN = os.getenv("IEX_TOKEN")
     NUM_YEARS_HISTORY = int(os.getenv('NUM_YEARS_HISTORY'))
@@ -53,6 +54,7 @@ else:
     store = pd.HDFStore(f'{BUCKET_DIR}/dev_iex_store.h5')
     requests_cache.install_cache('iex_cache')
     os.environ["IEX_API_VERSION"] = "iexcloud-sandbox"
+    FIRST_SYMBOL_IDX = 0
     LAST_SYMBOL_IDX = 11
     IEX_TOKEN = "Tpk_57fa15c2c86b4dadbb31e0c1ad1db895"
     NUM_YEARS_HISTORY = 4
@@ -171,8 +173,8 @@ def save_daily_results(df):
         json.dump(data, f)
 
 def main():
-    symbols = get_symbols(token=IEX_TOKEN)[:LAST_SYMBOL_IDX]
-    print("DONE retrieving symbols", flush=True)
+    symbols = get_symbols(token=IEX_TOKEN)[FIRST_SYMBOL_IDX:LAST_SYMBOL_IDX]
+    print(f"DONE retrieving {len(symbols)} symbols. About to process {FIRST_SYMBOL_IDX} to {LAST_SYMBOL_IDX}", flush=True)
     (df_min, df_max) = get_min_max_dfs(symbols)
     try:
         store.close()
