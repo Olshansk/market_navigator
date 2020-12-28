@@ -17,6 +17,9 @@ from iexfinance.stocks import get_historical_data
 from iexfinance.altdata import get_social_sentiment
 from iexfinance.stocks import Stock
 from iex_helpers.caching import get_historical_data_cached
+from gcloud_helpers.permissions import make_blob_public
+
+from google.cloud import storage
 
 # Reference: https://iexcloud.io/docs/api/?gclid=CjwKCAiA4o79BRBvEiwAjteoYP0BtY28kGPakJs9r71RIpoKP_v2OVC1_J_GNRzyUEBQjox_mf-NVxoCE-UQAvD_BwE#request-limits
 # tl;dr 100 requests per second
@@ -25,6 +28,8 @@ RATE_LIMIT_SLEEP =  10 # Amount of time to sleep whenever "waiting"
 
 # Deployment constants.
 BUCKET_DIR = "/data/market_navigator/static_data"
+
+BUCKET_NAME = "market-navigator-data"
 
 # Analysis constants.
 NUM_BUS_DAYS = 252 # TODO(olshansky): Better way to convert 52 weeks to business days
@@ -115,7 +120,9 @@ def get_min_max_dfs(symbols):
             df = get_historical_data_cached(store, symbol, start_date, end_date, close_only=True, output_format='pandas', token=IEX_TOKEN)
             num_requests_since_last_sleep += 1
             if num_requests_since_last_sleep > RATE_LIMIT_REQUESTS:
+                print("About to flush the store")
                 store.flush(fsync=True)
+                print("Finished flushing the store")
                 time.sleep(RATE_LIMIT_SLEEP)
 
             # TODO: Remove this eventually once iex or python module fixes things...
@@ -159,6 +166,7 @@ def save_daily_results(df):
     fig = ax.get_figure()
     fig.savefig(f"{BUCKET_DIR}/{env_prefix}per_high_low_{curr_date}.png")
     fig.savefig(f"{BUCKET_DIR}/{env_prefix}per_high_low_latest.png")
+    make_blob_public(BUCKET_NAME, f"{env_prefix}per_high_low_latest.png")
 
     data = {
         'near_max' : df.iloc[-1].near_max,
@@ -171,10 +179,12 @@ def save_daily_results(df):
         json.dump(data, f)
     with open(f'{BUCKET_DIR}/{env_prefix}per_high_low_latest.json', 'w') as f:
         json.dump(data, f)
+    make_blob_public(BUCKET_NAME, f"{env_prefix}per_high_low_latest.json")
 
 def main():
-    symbols = get_symbols(token=IEX_TOKEN)[FIRST_SYMBOL_IDX:LAST_SYMBOL_IDX]
-    print(f"DONE retrieving {len(symbols)} symbols. About to process {FIRST_SYMBOL_IDX} to {LAST_SYMBOL_IDX}", flush=True)
+    all_symbols = get_symbols(token=IEX_TOKEN)
+    symbols = all_symbols[FIRST_SYMBOL_IDX:LAST_SYMBOL_IDX]
+    print(f"DONE retrieving {len(all_symbols)} symbols. About to process {FIRST_SYMBOL_IDX} to {LAST_SYMBOL_IDX}", flush=True)
     (df_min, df_max) = get_min_max_dfs(symbols)
     try:
         store.close()
