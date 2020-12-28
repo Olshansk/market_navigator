@@ -56,7 +56,11 @@ if is_prod():
     END_DATE_OFFSET = int(os.getenv('END_DATE_OFFSET', "0"))
     print('END_DATE_OFFSET:', END_DATE_OFFSET)
 else:
-    store = pd.HDFStore(f'{BUCKET_DIR}/dev_iex_store.h5')
+    try:
+        store = pd.HDFStore(f'{BUCKET_DIR}/dev_iex_store.h5')
+    except:
+        store = pd.HDFStore(f'temp_iex_store.h5')
+        BUCKET_DIR = "."
     requests_cache.install_cache('iex_cache')
     os.environ["IEX_API_VERSION"] = "iexcloud-sandbox"
     FIRST_SYMBOL_IDX = 0
@@ -124,6 +128,7 @@ def get_min_max_dfs(symbols):
                 store.flush(fsync=True)
                 print("Finished flushing the store")
                 time.sleep(RATE_LIMIT_SLEEP)
+                num_requests_since_last_sleep = 0
 
             # TODO: Remove this eventually once iex or python module fixes things...
             # df = drop_duplicate_indecies(df)
@@ -155,7 +160,9 @@ def compute_stocks_near_max_min(df_max, df_min):
 
 def save_daily_results(df):
     ax = df.plot(color=[RED, BLUE], figsize=(20,10))
+    # ax.axes.get_xaxis().set_title("")
     ax.set_title(f"Percentage of stocks within {MAX_DELTA_PER * 100}% of 52 week min/max.")
+    ax.set_xlabel("")
     ax.axhline(y=df['near_max'].mean(), linestyle='--', color=RED)
     ax.axhline(y=df['near_min'].mean(), linestyle='--', color=BLUE)
 
@@ -171,8 +178,8 @@ def save_daily_results(df):
     data = {
         'near_max' : df.iloc[-1].near_max,
         'near_min' : df.iloc[-1].near_min,
-        'avg_near_max' : df.iloc[-1].near_min,
-        'avg_near_min' : df.iloc[-1].near_min
+        'avg_near_max' : df["near_max"].mean(),
+        'avg_near_min' : df["near_min"].mean()
     }
 
     with open(f'{BUCKET_DIR}/{env_prefix}per_high_low_{curr_date}.json', 'w') as f:
