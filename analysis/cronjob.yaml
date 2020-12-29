@@ -19,6 +19,13 @@ spec:
           containers:
             - name: market-state
               image: gcr.io/market-navigator-281018/market_navigator_analysis:latest
+              resources:
+                limits:
+                  memory: 1280Mi
+                  cpu: "1.5"
+                requests:
+                  memory: 1280Mi
+                  cpu: "1.5"
               env:
               - name: ENVIRONMENT
                 value: "PROD"
@@ -42,6 +49,11 @@ spec:
                   configMapKeyRef:
                     name: analysis-config
                     key: FIRST_SYMBOL_IDX
+              - name: RATE_LIMIT_REQUESTS
+                valueFrom:
+                  configMapKeyRef:
+                    name: analysis-config
+                    key: RATE_LIMIT_REQUESTS
               - name: END_DATE_OFFSET
                 valueFrom:
                   configMapKeyRef:

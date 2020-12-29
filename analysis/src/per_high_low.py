@@ -23,7 +23,7 @@ from google.cloud import storage
 
 # Reference: https://iexcloud.io/docs/api/?gclid=CjwKCAiA4o79BRBvEiwAjteoYP0BtY28kGPakJs9r71RIpoKP_v2OVC1_J_GNRzyUEBQjox_mf-NVxoCE-UQAvD_BwE#request-limits
 # tl;dr 100 requests per second
-RATE_LIMIT_REQUESTS = 100  # Number of requests to make before sleeping
+RATE_LIMIT_REQUESTS = int(os.getenv('RATE_LIMIT_REQUESTS', 100)) # Number of requests to make before sleeping
 RATE_LIMIT_SLEEP =  10 # Amount of time to sleep whenever "waiting"
 
 # Deployment constants.
@@ -179,7 +179,9 @@ def save_daily_results(df):
         'near_max' : df.iloc[-1].near_max,
         'near_min' : df.iloc[-1].near_min,
         'avg_near_max' : df["near_max"].mean(),
-        'avg_near_min' : df["near_min"].mean()
+        'avg_near_min' : df["near_min"].mean(),
+        'max_delta_per' : MAX_DELTA_PER
+
     }
 
     with open(f'{BUCKET_DIR}/{env_prefix}per_high_low_{curr_date}.json', 'w') as f:
