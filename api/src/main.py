@@ -4,7 +4,7 @@ import uvicorn
 import json
 app = FastAPI()
 
-# TODO(olshansky): Create shared constants lib between the different modules in market navigator
+# TODO(olshansky): Replace this with data['max_delta_per'] after the next deployment.
 MAX_DELTA_PER = 0.2
 
 class Item(BaseModel):
@@ -20,8 +20,8 @@ async def read_root():
 async def market_state():
     with open("/market_navigator_data/per_high_low.json", "r") as f:
         data = json.loads(f.read())
-        top_stocks_label = f"{round(data['near_max'] * 100)}% of stocks on the market are within {round(MAX_DELTA_PER * 100)}% percent of their 52 week MAXIMUM, compared to an average of {round(data['avg_near_max'] * 100)}%."
-        bottom_stocks_label = f"{round(data['near_min'] * 100)}% of stocks on the market are within {round(MAX_DELTA_PER * 100)}% percent of their 52 week MINIMUM, compared to an average of {round(data['avg_near_min'] * 100)}%."
+        top_stocks_label = f"{round(data['near_max'] * 100)}% of stocks are within {round(MAX_DELTA_PER * 100)}% percent of their 52 week MAX, compared to an average of {round(data['avg_near_max'] * 100)}%."
+        bottom_stocks_label = f"{round(data['near_min'] * 100)}% of stocks are within {round(MAX_DELTA_PER * 100)}% percent of their 52 week MIN, compared to an average of {round(data['avg_near_min'] * 100)}%."
         return {
             'top_stocks_label': top_stocks_label,
             'bottom_stocks_label': bottom_stocks_label

@@ -11,8 +11,8 @@
 
     <ul class="nav nav-tabs">
        <li class="nav-item"><a data-toggle="tab" class="nav-link active" href="#menu1">Market State</a></li>
-       <li class="nav-item"><a data-toggle="tab" class="nav-link" href="#menu2">Bitcoin Mayer Multiple</a></li>
-       <li class="nav-item"><a data-toggle="tab" class="nav-link" href="#menu3">Stockrow filter</a></li>
+       <li class="nav-item"><a data-toggle="tab" class="nav-link" href="#menu2">Stockrow filter</a></li>
+       <li class="nav-item"><a data-toggle="tab" class="nav-link" href="#menu3">Bitcoin Mayer Multiple</a></li>
        <li class="nav-item"><a data-toggle="tab" class="nav-link" href="#menu4">More Metrics</a></li>
      </ul>
 
@@ -20,15 +20,28 @@
       <div id="menu1" class="tab-pane active">
         <h3 class="market_state_header">Market State</h3>
 
-        <div class="control-group">
-          <h4><label class="control-label">Stocks Up</label></h4>
-          <label id="topStocksLabel" class="control-label static-text"></label>
+        <div class="mb-3">
+          A view to get a general idea if the market as a whole is over or under valued.
         </div>
 
-        <div class="control-group">
-          <h4><label class="control-label">Stocks Down</label></h4>
-          <label id="bottomStocksLabel"  class="control-label static-text"></label>
-        </div>
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th scope="col">Metric</th>
+              <th scope="col">Comment</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Stocks Up</th>
+              <td id="topStocksLabel" class="control-label static-text"></td>
+            </tr>
+            <tr>
+              <th scope="row">Stocks Down</th>
+              <td id="bottomStocksLabel" class="control-label static-text"></td>
+            </tr>
+          </tbody>
+        </table>
 
         <div class="aligncenter">
           <a href="https://storage.googleapis.com/market-navigator-data/per_high_low_latest.png" target="_blank">
@@ -38,12 +51,6 @@
       </div>
 
       <div id="menu2" class="tab-pane">
-        <h3 class="market_state_header">Bitcoin Mayer Multiple</h3>
-        <a class="twitter-timeline" data-lang="en" data-width="790" href="https://twitter.com/TIPMayerMultple?ref_src=twsrc%5Etfw">Tweets by TIPMayerMultple</a>
-        <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-      </div>
-
-      <div id="menu3" class="tab-pane">
         <ul>
           <h3></h3>
           <li><a target="_blank" href="https://stockrow.com/screener/39ad3ccc-4980-47b9-93eb-62af3a1f60b0">Stockrow screener</a></li>
@@ -51,9 +58,15 @@
         </ul>
       </div>
 
+      <div id="menu3" class="tab-pane">
+        <h3 class="market_state_header">Bitcoin Mayer Multiple</h3>
+        <a class="twitter-timeline" data-lang="en" data-width="790" href="https://twitter.com/TIPMayerMultple?ref_src=twsrc%5Etfw">Tweets by TIPMayerMultple</a>
+        <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+      </div>
+
       <div id="menu4" class="tab-pane">
         <h3>More Metrics</h3>
-        <p>Coming soon!</p>
+        <p>Stay tuned for more value and momentum metrics coming soon!</p>
       </div>
 
     </div>
