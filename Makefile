@@ -79,13 +79,24 @@ gcloud_auth_docker:
 # Free tiers can be found here: https://cloud.google.com/free
 # This should be cheap ($5/month?)
 .PHONY: gcloud_create_cluster
-## Create a kube cluster with the proper permissions.
+## Create a small kube cluster with the proper permissions.
 gcloud_create_cluster:
 	gcloud container clusters create market-navigator \
 	--zone us-west1-a \
 	--node-locations us-west1-a \
 	--scopes=default,bigquery,cloud-platform,compute-rw,datastore,storage-full,taskqueue,userinfo-email,sql-admin \
 	--machine-type=e2-small \
+	--max-nodes=1 \
+	--num-nodes=1
+
+.PHONY: gcloud_create_cluster_medium
+## Create a medium kube cluster with the proper permissions.
+gcloud_create_cluster_medium:
+	gcloud container clusters create market-navigator \
+	--zone us-west1-a \
+	--node-locations us-west1-a \
+	--scopes=default,bigquery,cloud-platform,compute-rw,datastore,storage-full,taskqueue,userinfo-email,sql-admin \
+	--machine-type=e2-medium \
 	--max-nodes=1 \
 	--num-nodes=1
 

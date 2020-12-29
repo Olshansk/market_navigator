@@ -7,3 +7,4 @@ __pycache__/
 dev_per_high_low_*.png
 core
 .ipynb_checkpoints
+node_modules

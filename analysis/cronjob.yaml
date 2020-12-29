@@ -21,11 +21,11 @@ spec:
               image: gcr.io/market-navigator-281018/market_navigator_analysis:latest
               resources:
                 limits:
-                  memory: 1280Mi
-                  cpu: "1.5"
+                  memory: "2048Mi"
+                  # cpu: "900m"
                 requests:
-                  memory: 1280Mi
-                  cpu: "1.5"
+                  memory: "1024Mi"
+                  # cpu: "900m"
               env:
               - name: ENVIRONMENT
                 value: "PROD"

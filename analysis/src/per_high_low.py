@@ -98,16 +98,16 @@ def count_trues(row):
     return round(s / l, 2) if l > 0 else None
 
 def get_min_max_dfs(symbols):
-    end_date = datetime.now() - relativedelta(days=END_DATE_OFFSET)
+    end_date = datetime.now()
     if NUM_YEARS_HISTORY is None:
         start_date = end_date - relativedelta(days=NUM_DAYS_HISTORY)
     else:
-        start_date = end_date - relativedelta(years=NUM_YEARS_HISTORY)
+        start_date = end_date - relativedelta(years=NUM_YEARS_HISTORY) + relativedelta(days=1)
         # 15 years is the max according to https://iexcloud.io/docs/api/#historical-prices
         # so we need to make sure the data exists
         if NUM_YEARS_HISTORY == 15:
             start_date += relativedelta(days=7)
-
+    end_date = end_date - relativedelta(days=END_DATE_OFFSET)
 
     df_min = pd.DataFrame(columns=['date'])
     df_min.set_index('date', inplace=True)
