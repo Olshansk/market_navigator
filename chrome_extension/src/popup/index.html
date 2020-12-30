@@ -36,10 +36,10 @@
             </li>
             <li>
               <a class="navigator-tab"
-                 x-bind:class="{ 'active': tab === 'more' }"
-                 x-on:click.prevent="tab = 'more'"
+                 x-bind:class="{ 'active': tab === 'coming_soon' }"
+                 x-on:click.prevent="tab = 'coming_soon'"
                  href="#">
-                More
+                Coming Soon
               </a>
             </li>
           </ul>
@@ -76,17 +76,22 @@
           </div>
         </div>
         <div x-show="tab === 'stockrow'">
-          <li><a target="_blank" href="https://stockrow.com/screener/39ad3ccc-4980-47b9-93eb-62af3a1f60b0">Stockrow screener</a></li>
-          <li><a target="_blank" href="https://stockrow.com/screener/1f75c97a-b652-4539-bdd4-7e7c5fdedf82">Stockrow columns filter</a></li>
+          <div class="m-3">
+            <a class="underline text-blue-600" target_="_blank" href="https://stockrow.com">Stockrow</a> is the best website I've found that makes financial data easy to access and interpret.
+          </div>
+          <li><a class="underline text-blue-600" target="_blank" href="https://stockrow.com/screener/39ad3ccc-4980-47b9-93eb-62af3a1f60b0">This screener</a> is a good starting point for somewhat financially stable midcap companies.</li>
+          <li><a class="underline text-blue-600" target="_blank" href="https://stockrow.com/screener/1f75c97a-b652-4539-bdd4-7e7c5fdedf82">This filter</a> is what I use to do a preliminary evaluation before diving deep into any single company.</li>
         </div>
         <div x-show="tab === 'crypto'">
-          <div class="mx-auto">
-            <a class="twitter-timeline mx-auto" data-tweet-limit="1" data-lang="en" data-width="500" href="https://twitter.com/TIPMayerMultple?ref_src=twsrc%5Etfw">Tweets by TIPMayerMultple</a>
+          <div class="flex justify-center">
+            <a class="twitter-timeline" data-tweet-limit="1" data-lang="en" data-width="600" href="https://twitter.com/TIPMayerMultple?ref_src=twsrc%5Etfw">Tweets by TIPMayerMultple</a>
             <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
           </div>
         </div>
-        <div x-show="tab === 'more'">
-          <p>Stay tuned for more value and momentum metrics coming soon!</p>
+        <div x-show="tab === 'coming_soon'">
+          <div class="m-3">
+            <p>Come back for momentum, deep value and other more interactive tools coming soon!</p>
+          </div>
         </div>
       </div>
     </div>

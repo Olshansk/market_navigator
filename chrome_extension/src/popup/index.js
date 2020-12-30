@@ -17,7 +17,7 @@ function updateMarketState(table) {
 // Reasoning for `window.`: https://github.com/alpinejs/alpine/issues/152#issuecomment-595454553
 window.initMarket = function () {
   return {
-    tab: 'market',
+    tab: 'crypto',
     updateMarketState: updateMarketState
   };
 }
