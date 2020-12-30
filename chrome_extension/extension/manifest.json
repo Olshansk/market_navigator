@@ -1,7 +1,12 @@
 {
   "name": "Market Navigator",
-  "version": "0.0.0.1",
-  "description": "Notifications and tools to navigate a turbulent market.",
+  "version": "0.0.0.2",
+  "icons": {
+    "16": "./dist/icons/icon16.png",
+    "32": "./dist/icons/icon32.png",
+    "128": "./dist/icons/icon128.png"
+  },
+  "description": "Tools and reference to navigate a challenging market.",
   "permissions": [
   ],
   "web_accessible_resources": [

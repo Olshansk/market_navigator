@@ -211,4 +211,4 @@ analysis_docker_push:
 .PHONY: chrome_extension_zip
 ## Zip up the chrome extension
 chrome_extension_zip:
-	zip -r market_navigator.zip chrome_extension
+	zip -r market_navigator.zip chrome_extension/extension
