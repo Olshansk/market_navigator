@@ -6,23 +6,9 @@
 
 @tailwind screens;
 
-.btn {
-  @apply font-bold py-2 px-4 rounded;
+.navigator-tab {
+  @apply inline-block py-2 px-4 font-semibold;
 }
-.btn-blue {
-  @apply bg-blue-500 hover:bg-blue-700 text-white;
+.navigator-tab:hover {
+  @apply text-blue-600;
 }
-
-/* .text-input {
-  @apply bg-blue text-white font-bold py-2 px-4 rounded-full;
-  &:hover {
-    @apply bg-blue-dark;
-  }
-} */
-
- /* @layer components {
-  .navigator-tab {
-    @apply bg-blue-600 hover:bg-blue-600 text-white;
-    @apply .bg-white .inline-block .py-2 .px-4 .font-semibold hover:text-blue-600 ;
-  }
-} */

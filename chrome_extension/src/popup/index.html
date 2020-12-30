@@ -4,39 +4,40 @@
   </head>
   <body>
     <div class="min-w-popup">
-      <!-- Referenced from https://dev.to/mtownsend5512/creating-powerful-tabs-with-alpine-js-in-less-than-5-minutes-367d -->
+      <!-- Referenced from https://dberri.com/lets-build-a-tab-navigation-with-alpine-js/ -->
       <div x-data="{ tab: 'market' }" id="tab_wrapper">
+
         <!-- The tabs navigation -->
-        <nav>
-          <ul class="list-reset flex">
-            <li class="">
+        <nav class="bg-gray-100 text-gray-800">
+          <ul class="flex">
+            <li>
               <a class="navigator-tab"
-                 :class="{ 'active': tab === 'market' }"
-                 @click.prevent="tab = 'market'"
+                 x-bind:class="{ 'active': tab === 'market' }"
+                 x-on:click.prevent="tab = 'market'"
                  href="#">
                 Market
               </a>
             </li>
-            <li class="">
+            <li>
               <a class="navigator-tab"
-                 :class="{ 'active': tab === 'stockrow' }"
-                 @click.prevent="tab = 'stockrow'"
+                 x-bind:class="{ 'active': tab === 'stockrow' }"
+                 x-on:click.prevent="tab = 'stockrow'"
                  href="#">
                 Stockrow
               </a>
             </li>
-            <li class="">
+            <li>
               <a class="navigator-tab"
-                 :class="{ 'active': tab === 'crypto' }"
-                 @click.prevent="tab = 'crypto'"
+                 x-bind:class="{ 'active': tab === 'crypto' }"
+                 x-on:click.prevent="tab = 'crypto'"
                  href="#">
                 Crypto
               </a>
             </li>
-            <li class="">
+            <li>
               <a class="navigator-tab"
-                 :class="{ 'active': tab === 'more' }"
-                 @click.prevent="tab = 'more'"
+                 x-bind:class="{ 'active': tab === 'more' }"
+                 x-on:click.prevent="tab = 'more'"
                  href="#">
                 More
               </a>
