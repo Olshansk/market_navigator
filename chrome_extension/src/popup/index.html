@@ -1,0 +1,94 @@
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="./popup.css" />
+  </head>
+  <body>
+    <div class="min-w-popup">
+      <!-- Referenced from https://dev.to/mtownsend5512/creating-powerful-tabs-with-alpine-js-in-less-than-5-minutes-367d -->
+      <div x-data="{ tab: 'market' }" id="tab_wrapper">
+        <!-- The tabs navigation -->
+        <nav>
+          <ul class="list-reset flex">
+            <li class="">
+              <a class="navigator-tab"
+                 :class="{ 'active': tab === 'market' }"
+                 @click.prevent="tab = 'market'"
+                 href="#">
+                Market
+              </a>
+            </li>
+            <li class="">
+              <a class="navigator-tab"
+                 :class="{ 'active': tab === 'stockrow' }"
+                 @click.prevent="tab = 'stockrow'"
+                 href="#">
+                Stockrow
+              </a>
+            </li>
+            <li class="">
+              <a class="navigator-tab"
+                 :class="{ 'active': tab === 'crypto' }"
+                 @click.prevent="tab = 'crypto'"
+                 href="#">
+                Crypto
+              </a>
+            </li>
+            <li class="">
+              <a class="navigator-tab"
+                 :class="{ 'active': tab === 'more' }"
+                 @click.prevent="tab = 'more'"
+                 href="#">
+                More
+              </a>
+            </li>
+          </ul>
+        </nav>
+
+        <!-- The tabs content -->
+        <div x-show="tab === 'market'">
+          <div class="mb-3">
+            A list of metrics I use to understand what the state of the market as a whole is.
+          </div>
+          <table class="table table-striped">
+           <thead>
+             <tr>
+               <th scope="col">Metric</th>
+               <th scope="col">Description</th>
+             </tr>
+           </thead>
+           <tbody>
+             <tr>
+               <th scope="row">Near Max</th>
+               <td id="topStocksLabel" class="control-label static-text"></td>
+             </tr>
+             <tr>
+               <th scope="row">Near Min</th>
+               <td id="bottomStocksLabel" class="control-label static-text"></td>
+             </tr>
+           </tbody>
+          </table>
+
+          <div class="justify-center">
+           <a href="https://storage.googleapis.com/market-navigator-data/per_high_low_latest.png" target="_blank">
+             <img class="mx-auto" id="imageresource" src="https://storage.googleapis.com/market-navigator-data/per_high_low_latest.png" style="width: 600px; height: 300px;"/>
+           </a>
+          </div>
+        </div>
+        <div x-show="tab === 'stockrow'">
+          <li><a target="_blank" href="https://stockrow.com/screener/39ad3ccc-4980-47b9-93eb-62af3a1f60b0">Stockrow screener</a></li>
+          <li><a target="_blank" href="https://stockrow.com/screener/1f75c97a-b652-4539-bdd4-7e7c5fdedf82">Stockrow columns filter</a></li>
+        </div>
+        <div x-show="tab === 'crypto'">
+          <div class="mx-auto">
+            <a class="twitter-timeline mx-auto" data-tweet-limit="1" data-lang="en" data-width="500" href="https://twitter.com/TIPMayerMultple?ref_src=twsrc%5Etfw">Tweets by TIPMayerMultple</a>
+            <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+          </div>
+        </div>
+        <div x-show="tab === 'more'">
+          <p>Stay tuned for more value and momentum metrics coming soon!</p>
+        </div>
+      </div>
+    </div>
+    <script type="text/javascript" src="./popup.dist.js"></script>
+  </body>
+</html>
