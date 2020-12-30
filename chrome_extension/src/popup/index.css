@@ -26,6 +26,14 @@ a {
   border-bottom: 0;
 }
 
+table {
+    border-collapse: collapse;
+}
+
+tr {
+  border-bottom: 1pt solid #e2e8f0;
+}
+
 .active {
   border:1px solid #ebecf1;
   border-bottom: 0px;
