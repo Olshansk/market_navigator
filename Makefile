@@ -44,7 +44,6 @@ minikube_start_dashboard:
 .PHONY: minikube_start_with_mount
 ## MK: Start minikube with a local mount.
 minikube_start_with_mount:
-	# minikube start --mount-string "$(PWD):/src/" --mount --driver=docker
 	minikube start --mount-string "$(PWD):/src/" --mount
 	minikube addons enable gcp-auth
 
@@ -60,18 +59,36 @@ make_all_volumes:
 gcr_list_images:
 	gcloud container images list-tags
 
+.PHONY: gcloud_create_docker_secret
+## Create the kubernetes docker registry secret.
+gcloud_create_docker_secret:
+	kubectl create secret docker-registry gcr-json-key \
+		--save-config --dry-run=client \
+    --docker-server=https://gcr.io \
+    --docker-username=_json_key \
+    --docker-password='$(DOCKER_PASSWORD)' \
+    --docker-email=olshansky.daniel@gmail.com \
+		-o yaml | kubectl apply -f -
+
+.PHONY: gcloud_create_gcp_key
+## Create the kubernetes GCP secret.
+gcloud_create_gcp_key:
+	kubectl create secret generic gcp-key \
+		--save-config --dry-run=client \
+		--from-file=$(KEY_FILE) \
+		-o yaml | kubectl apply -f -
+
+.PHONY: gcloud_secrets
+## Create all the kubernetes secrets.
+gcloud_secrets: gcloud_create_gcp_key gcloud_create_docker_secret
+
 .PHONY: gcloud_auth_docker
 ## GCP: Authenticate docker related things.
-gcloud_auth_docker:
+gcloud_auth_docker: gcloud_create_docker_secret
 	gcloud auth login
 	gcloud config set project $(PROJECT_ID)
 	gcloud auth activate-service-account olshansky-daniel-gmail-com@market-navigator-281018.iam.gserviceaccount.com --key-file=$(KEY_FILE)
 	gcloud auth configure-docker
-	kubectl create secret docker-registry gcr-json-key \
-          --docker-server=https://gcr.io \
-          --docker-username=_json_key \
-          --docker-password='$(DOCKER_PASSWORD)' \
-          --docker-email=olshansky.daniel@gmail.com
 	kubectl patch serviceaccount default \
           -p '{"imagePullSecrets": [{"name": "gcr-json-key"}]}'
 
@@ -147,18 +164,26 @@ analysis_kube_create_cf:
 	kubectl apply -f analysis/configmap.yaml
 
 .PHONY: analysis_kube_create_job
-## Delete the analysis cron job config, create a new one, and trigger a job.
-analysis_kube_create_job: analysis_kube_create_cf
+## GKE: Delete the analysis cron job config, create a new one, and trigger a job.
+analysis_kube_create_job_gke: analysis_kube_create_cf
 	kubectl delete cronjob analysis || sleep 2 \
-		&& kubectl create -f analysis/cronjob.yaml \
+		&& kubectl create -f analysis/cronjob-gke.yaml \
 		&& sleep 2 \
 		&& kubectl create job --from=cronjob/analysis analysis-test
 
-.PHONY: analysis_kube_create_job_local
-## Delete the analysis cron job config, create a new one, and trigger a job.
-analysis_kube_create_job_local: analysis_kube_create_cf
+.PHONY: analysis_kube_create_job_digital_ocean
+## Digital Ocean: Delete the analysis cron job config, create a new one, and trigger a job.
+analysis_kube_create_job_digital_ocean: gcloud_secrets analysis_kube_create_cf
 	kubectl delete cronjob analysis || sleep 2 \
-		&& kubectl create -f analysis/cronjob-local.yaml \
+		&& kubectl create -f analysis/cronjob-digital-ocean.yaml \
+		&& sleep 2 \
+		&& kubectl create job --from=cronjob/analysis analysis-test
+
+.PHONY: analysis_kube_create_job_minikube
+## Minikube: Delete the analysis cron job config, create a new one, and trigger a job.
+analysis_kube_create_job_minikube: analysis_kube_create_cf
+	kubectl delete cronjob analysis || sleep 2 \
+		&& kubectl create -f analysis/cronjob-minikube.yaml \
 		&& sleep 2 \
 		&& kubectl create job --from=cronjob/analysis analysis-test
 

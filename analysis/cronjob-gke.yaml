@@ -1,0 +1,75 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: analysis
+  labels:
+    job: analysis
+spec:
+  ## Weekly cron schedule. Change to daily once I upgrade to a paid plan.
+  schedule: "0 0 * * 0"
+  concurrencyPolicy: "Forbid"
+  suspend: true
+  failedJobsHistoryLimit: 3
+  successfulJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: market-state
+              image: gcr.io/market-navigator-281018/market_navigator_analysis:latest
+              resources:
+                limits:
+                  memory: "2048Mi"
+                requests:
+                  memory: "1024Mi"
+              env:
+              - name: ENVIRONMENT
+                value: "PROD"
+              - name: NUM_YEARS_HISTORY
+                valueFrom:
+                  configMapKeyRef:
+                    name: analysis-config
+                    key: NUM_YEARS_HISTORY
+              - name: IEX_TOKEN
+                valueFrom:
+                  configMapKeyRef:
+                    name: analysis-config
+                    key: IEX_TOKEN
+              - name: LAST_SYMBOL_IDX
+                valueFrom:
+                  configMapKeyRef:
+                    name: analysis-config
+                    key: LAST_SYMBOL_IDX
+              - name: FIRST_SYMBOL_IDX
+                valueFrom:
+                  configMapKeyRef:
+                    name: analysis-config
+                    key: FIRST_SYMBOL_IDX
+              - name: RATE_LIMIT_REQUESTS
+                valueFrom:
+                  configMapKeyRef:
+                    name: analysis-config
+                    key: RATE_LIMIT_REQUESTS
+              - name: END_DATE_OFFSET
+                valueFrom:
+                  configMapKeyRef:
+                    name: analysis-config
+                    key: END_DATE_OFFSET
+              imagePullPolicy: Always
+              command: [ "/bin/bash", "-c", "--" ]
+              args: [ "sleep 15; nohup python per_high_low.py" ] ## Sleep is added to allow gcsfuse sufficient time to configure.
+              # args: [ "while true; do sleep 30; done;"]
+              securityContext:
+                privileged: true
+                capabilities:
+                  add:
+                    - SYS_ADMIN
+              lifecycle:
+                postStart:
+                  exec:
+                    command: ['gcsfuse', '-o', 'allow_other', 'market-navigator-data', '/data/market_navigator/static_data']
+                preStop:
+                  exec:
+                    command: ['fusermount', '-u', '/data/market_navigator/static_data']

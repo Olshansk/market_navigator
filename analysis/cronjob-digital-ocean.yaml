@@ -16,17 +16,31 @@ spec:
       template:
         spec:
           restartPolicy: OnFailure
+          volumes:
+            - name: secret-volume
+              projected:
+                sources:
+                  - secret:
+                      name: gcp-key
+                  - secret:
+                      name: gcr-json-key
+          imagePullSecrets:
+              - name: gcr-json-key
           containers:
             - name: market-state
               image: gcr.io/market-navigator-281018/market_navigator_analysis:latest
+              volumeMounts:
+                - name: secret-volume
+                  readOnly: true
+                  mountPath: "/var/secrets/google"
               resources:
                 limits:
                   memory: "2048Mi"
-                  # cpu: "900m"
                 requests:
                   memory: "1024Mi"
-                  # cpu: "900m"
               env:
+              - name: GOOGLE_APPLICATION_CREDENTIALS
+                value: /var/secrets/google/market-navigator-281018-6606d28522f1.json
               - name: ENVIRONMENT
                 value: "PROD"
               - name: NUM_YEARS_HISTORY
@@ -61,8 +75,7 @@ spec:
                     key: END_DATE_OFFSET
               imagePullPolicy: Always
               command: [ "/bin/bash", "-c", "--" ]
-              ## Sleep is added to allow gcsfuse sufficient time to configure.
-              args: [ "sleep 15; nohup python per_high_low.py" ]
+              args: [ "sleep 15; nohup python per_high_low.py" ] ## Sleep is added to allow gcsfuse sufficient time to configure.
               # args: [ "while true; do sleep 30; done;"]
               securityContext:
                 privileged: true

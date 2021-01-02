@@ -14,6 +14,9 @@ spec:
   jobTemplate:
     spec:
       template:
+        # metadata:
+        #   labels:
+        #     gcp-auth-skip-secret: "true"
         spec:
           restartPolicy: OnFailure
           volumes:
@@ -29,13 +32,8 @@ spec:
               - name: ENVIRONMENT
                 value: "DEV"
               imagePullPolicy: IfNotPresent
-              # command: ["python", "per_high_low.py"]
               command: [ "/bin/bash", "-c", "--" ]
-              ## Sleep is added to allow gcsfuse sufficient time to configure.
-              args: [ "sleep 15; nohup python per_high_low.py" ]
-              ## Args below can be used to redirect the output not to stdout.
-              # args: [ "sleep 15; nohup python per_high_low.py > /data/market_navigator/static_data/dev_analysis_logs.out 2>&1 " ]
-              ## Args below are useful for testing:
+              args: [ "sleep 15; nohup python per_high_low.py" ] ## Sleep is added to allow gcsfuse sufficient time to configure.
               # args: [ "while true; do sleep 30; done;"]
               volumeMounts:
                 - name: local-src
