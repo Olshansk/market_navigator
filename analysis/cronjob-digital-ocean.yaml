@@ -68,11 +68,16 @@ spec:
                   configMapKeyRef:
                     name: analysis-config
                     key: RATE_LIMIT_REQUESTS
-              - name: END_DATE_OFFSET
+              - name: START_DATE
                 valueFrom:
                   configMapKeyRef:
                     name: analysis-config
-                    key: END_DATE_OFFSET
+                    key: START_DATE
+              - name: END_DATE
+                valueFrom:
+                  configMapKeyRef:
+                    name: analysis-config
+                    key: START_DATE
               imagePullPolicy: Always
               command: [ "/bin/bash", "-c", "--" ]
               args: [ "sleep 15; nohup python per_high_low.py" ] ## Sleep is added to allow gcsfuse sufficient time to configure.

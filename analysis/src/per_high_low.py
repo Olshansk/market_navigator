@@ -39,41 +39,30 @@ MAX_DELTA_PER = 0.2
 RED = "#FF0000"
 BLUE = "#0000FF"
 
+START_DATE = datetime.strptime(os.getenv('START_DATE', '%Y-%m-%d')) if 'START_DATE' in os.environ else None
+END_DATE = datetime.strptime(os.getenv('END_DATE', '%Y-%m-%d')) if 'END_DATE' in os.environ else None
+
 def is_prod():
     return os.getenv('ENVIRONMENT') == "PROD"
 
 # Track usage here: https://iexcloud.io/console/usage
 if is_prod():
-    store = pd.HDFStore(f'{BUCKET_DIR}/iex_store.h5')
     os.environ["IEX_API_VERSION"] = "iexcloud-v1"
+    IEX_TOKEN = os.getenv("IEX_TOKEN")
+    store = pd.HDFStore(f'{BUCKET_DIR}/iex_store.h5')
     FIRST_SYMBOL_IDX = int(os.getenv('FIRST_SYMBOL_IDX'))
     LAST_SYMBOL_IDX = int(os.getenv('LAST_SYMBOL_IDX'))
-    IEX_TOKEN = os.getenv("IEX_TOKEN")
     NUM_YEARS_HISTORY = int(os.getenv('NUM_YEARS_HISTORY'))
-    if NUM_YEARS_HISTORY is None:
-        print('NUM_YEARS_HISTORY is not set so using 3 days instead')
-        NUM_DAYS_HISTORY = 3
-    END_DATE_OFFSET = int(os.getenv('END_DATE_OFFSET', "0"))
-    print('END_DATE_OFFSET:', END_DATE_OFFSET)
 else:
-    try:
-        store = pd.HDFStore(f'{BUCKET_DIR}/dev_iex_store.h5')
-    except:
-        store = pd.HDFStore(f'temp_iex_store.h5')
-        BUCKET_DIR = "."
-    requests_cache.install_cache('iex_cache')
     os.environ["IEX_API_VERSION"] = "iexcloud-sandbox"
+    IEX_TOKEN = "Tpk_57fa15c2c86b4dadbb31e0c1ad1db895"
+    if not os.path.exists(BUCKET_DIR):
+        BUCKET_DIR = ".."
+    store = pd.HDFStore(f'{BUCKET_DIR}/dev_iex_store.h5')
+    requests_cache.install_cache('iex_cache')
     FIRST_SYMBOL_IDX = 0
     LAST_SYMBOL_IDX = 11
-    IEX_TOKEN = "Tpk_57fa15c2c86b4dadbb31e0c1ad1db895"
     NUM_YEARS_HISTORY = 4
-    END_DATE_OFFSET = 0
-
-# The data fro IEX seems to be corrupted and have multiple entries for the same date. Only doing this as a workaround
-# but need to eventually understand why it's happening.
-# https://stackoverflow.com/questions/13035764/remove-rows-with-duplicate-indices-pandas-dataframe-and-timeseries
-def drop_duplicate_indecies(df):
-    return df.loc[~df.index.duplicated(keep='first')]
 
 def is_near_min(delta):
     def is_near_min_internal(row):
@@ -97,17 +86,18 @@ def count_trues(row):
     s = filtered.count(True)
     return round(s / l, 2) if l > 0 else None
 
-def get_min_max_dfs(symbols):
+def configure_dates():
+    if None not in (START_DATE, END_DATE):
+        return (START_DATE, END_DATE)
+
     end_date = datetime.now()
-    if NUM_YEARS_HISTORY is None:
-        start_date = end_date - relativedelta(days=NUM_DAYS_HISTORY)
-    else:
-        start_date = end_date - relativedelta(years=NUM_YEARS_HISTORY) + relativedelta(days=1)
-        # 15 years is the max according to https://iexcloud.io/docs/api/#historical-prices
-        # so we need to make sure the data exists
-        if NUM_YEARS_HISTORY == 15:
-            start_date += relativedelta(days=7)
-    end_date = end_date - relativedelta(days=END_DATE_OFFSET)
+    start_date = end_date - relativedelta(years=NUM_YEARS_HISTORY)
+    # Need to add a delta because 15 years is the max: https://iexcloud.io/docs/api/#historical-prices
+    start_date += (relativedelta(days=7) if NUM_YEARS_HISTORY >= 15 else relativedelta(days=0))
+    return (start_date, end_date)
+
+def get_min_max_dfs(symbols):
+    (start_date, end_date) = configure_dates()
 
     df_min = pd.DataFrame(columns=['date'])
     df_min.set_index('date', inplace=True)
@@ -117,10 +107,8 @@ def get_min_max_dfs(symbols):
 
     num_requests_since_last_sleep = 0
 
-    for _, symbol_metadata in symbols.iterrows():
-        symbol = symbol_metadata['symbol']
+    for symbol in symbols:
         try:
-            # df = get_historical_data(symbol, start_date, end_date, close_only=True, output_format='pandas', token=IEX_TOKEN)
             df = get_historical_data_cached(store, symbol, start_date, end_date, close_only=True, output_format='pandas', token=IEX_TOKEN)
             num_requests_since_last_sleep += 1
             if num_requests_since_last_sleep > RATE_LIMIT_REQUESTS:
@@ -129,9 +117,6 @@ def get_min_max_dfs(symbols):
                 print("Finished flushing the store")
                 time.sleep(RATE_LIMIT_SLEEP)
                 num_requests_since_last_sleep = 0
-
-            # TODO: Remove this eventually once iex or python module fixes things...
-            # df = drop_duplicate_indecies(df)
 
             df['rolling_max'] = df['close'].rolling(window=NUM_BUS_DAYS, min_periods=NUM_BUS_DAYS).max()
             df['rolling_min'] = df['close'].rolling(window=NUM_BUS_DAYS, min_periods=NUM_BUS_DAYS).min()
@@ -160,7 +145,6 @@ def compute_stocks_near_max_min(df_max, df_min):
 
 def save_daily_results(df):
     ax = df.plot(color=[RED, BLUE], figsize=(20,10))
-    # ax.axes.get_xaxis().set_title("")
     ax.set_title(f"Percentage of stocks within {MAX_DELTA_PER * 100}% of 52 week min/max.")
     ax.set_xlabel("")
     ax.axhline(y=df['near_max'].mean(), linestyle='--', color=RED)
@@ -192,7 +176,8 @@ def save_daily_results(df):
 
 def main():
     all_symbols = get_symbols(token=IEX_TOKEN)
-    symbols = all_symbols[FIRST_SYMBOL_IDX:LAST_SYMBOL_IDX]
+    symbols_df = all_symbols[FIRST_SYMBOL_IDX:LAST_SYMBOL_IDX]
+    symbols = [symbol_metadata['symbol'] for _, symbol_metadata in symbols_df.iterrows()]
     print(f"DONE retrieving {len(all_symbols)} symbols. About to process {FIRST_SYMBOL_IDX} to {LAST_SYMBOL_IDX}", flush=True)
     (df_min, df_max) = get_min_max_dfs(symbols)
     try:
