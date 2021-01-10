@@ -9,6 +9,7 @@ import json
 import time
 import warnings
 import tables
+import altair as alt
 
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
@@ -17,6 +18,8 @@ from iexfinance.stocks import get_historical_data
 from iexfinance.altdata import get_social_sentiment
 from iexfinance.stocks import Stock
 from iex_helpers.caching import get_historical_data_cached
+from altair_helpers.graphs import get_min_max_chart
+from matplotlib_helpers.graphs import get_min_max_plot
 from gcloud_helpers.permissions import make_blob_public
 
 from google.cloud import storage
@@ -34,16 +37,34 @@ BUCKET_NAME = "market-navigator-data"
 # Analysis constants.
 NUM_BUS_DAYS = 252 # TODO(olshansky): Better way to convert 52 weeks to business days
 MAX_DELTA_PER = 0.2
+# DELTAS = [0.05, 0.1, 0.15, 0.2, 0.25]
+DELTAS = [0.1, 0.2]
 
 # Graph visualization constants.
 RED = "#FF0000"
 BLUE = "#0000FF"
 
-START_DATE = datetime.strptime(os.getenv('START_DATE', '%Y-%m-%d')) if 'START_DATE' in os.environ else None
-END_DATE = datetime.strptime(os.getenv('END_DATE', '%Y-%m-%d')) if 'END_DATE' in os.environ else None
+START_DATE = datetime.strptime(os.getenv('START_DATE'), '%Y-%m-%d') if 'START_DATE' in os.environ else None
+END_DATE = datetime.strptime(os.getenv('END_DATE'), '%Y-%m-%d') if 'END_DATE' in os.environ else None
+
+from dataclasses import dataclass
+from typing import Dict
+
+@dataclass
+class MinMaxDataframe(object):
+    df_min: pd.DataFrame
+    df_max: pd.DataFrame
+
+@dataclass
+class MinMaxDataframes(object):
+    dfs_min: Dict[int, pd.DataFrame]
+    dfs_max: Dict[int, pd.DataFrame]
 
 def is_prod():
     return os.getenv('ENVIRONMENT') == "PROD"
+
+def env_prefix():
+    return "" if is_prod() else "dev_"
 
 # Track usage here: https://iexcloud.io/console/usage
 if is_prod():
@@ -57,8 +78,8 @@ else:
     os.environ["IEX_API_VERSION"] = "iexcloud-sandbox"
     IEX_TOKEN = "Tpk_57fa15c2c86b4dadbb31e0c1ad1db895"
     if not os.path.exists(BUCKET_DIR):
-        BUCKET_DIR = ".."
-    store = pd.HDFStore(f'{BUCKET_DIR}/dev_iex_store.h5')
+        BUCKET_DIR = "."
+        store = pd.HDFStore(f'../dev_iex_store.h5')
     requests_cache.install_cache('iex_cache')
     FIRST_SYMBOL_IDX = 0
     LAST_SYMBOL_IDX = 11
@@ -96,24 +117,20 @@ def configure_dates():
     start_date += (relativedelta(days=7) if NUM_YEARS_HISTORY >= 15 else relativedelta(days=0))
     return (start_date, end_date)
 
-def get_min_max_dfs(symbols):
+def get_min_max_dfs(symbols, local_store=None):
+    if local_store is None:
+        local_store = store
+
     (start_date, end_date) = configure_dates()
 
-    df_min = pd.DataFrame(columns=['date'])
-    df_min.set_index('date', inplace=True)
-
-    df_max = pd.DataFrame(columns=['date'])
-    df_max.set_index('date', inplace=True)
-
     num_requests_since_last_sleep = 0
-
     for symbol in symbols:
         try:
-            df = get_historical_data_cached(store, symbol, start_date, end_date, close_only=True, output_format='pandas', token=IEX_TOKEN)
+            df = get_historical_data_cached(local_store, symbol, start_date, end_date, close_only=True, output_format='pandas', token=IEX_TOKEN)
             num_requests_since_last_sleep += 1
             if num_requests_since_last_sleep > RATE_LIMIT_REQUESTS:
                 print("About to flush the store")
-                store.flush(fsync=True)
+                local_store.flush(fsync=True)
                 print("Finished flushing the store")
                 time.sleep(RATE_LIMIT_SLEEP)
                 num_requests_since_last_sleep = 0
@@ -121,74 +138,93 @@ def get_min_max_dfs(symbols):
             df['rolling_max'] = df['close'].rolling(window=NUM_BUS_DAYS, min_periods=NUM_BUS_DAYS).max()
             df['rolling_min'] = df['close'].rolling(window=NUM_BUS_DAYS, min_periods=NUM_BUS_DAYS).min()
 
-            min_key = f'{symbol}_near_min'
-            max_key = f'{symbol}_near_max'
+            dfs_min = {}
+            dfs_max = {}
+            for max_delta in DELTAS:
+                df_min = pd.DataFrame(columns=['date'])
+                df_min.set_index('date', inplace=True)
+                df_min[f'{symbol}_near_min'] = df.apply(is_near_min(max_delta), axis=1)
+                dfs_min[max_delta] = df_min
 
-            df_min[min_key] = df.apply(is_near_min(MAX_DELTA_PER), axis=1)
-            df_max[max_key] = df.apply(is_near_max(MAX_DELTA_PER), axis=1)
+                df_max = pd.DataFrame(columns=['date'])
+                df_max.set_index('date', inplace=True)
+                df_max[f'{symbol}_near_max'] = df.apply(is_near_max(max_delta), axis=1)
+                dfs_max[max_delta] = df_max
 
             print(f"Successfully processed {symbol}", flush=True)
         except Exception as e:
             print(f"Failed to process {symbol}: {e}.", flush=True)
 
-    return (df_min, df_max)
+    return MinMaxDataframes(dfs_min=dfs_min, dfs_max=dfs_max)
 
-# TODO: Remind yourself how this work by running it in a notebook.
-def compute_stocks_near_max_min(df_max, df_min):
-    df_res = pd.DataFrame(columns=['date'])
-    df_res.set_index('date', inplace=True)
+def compute_near_max_min(symbols):
+    min_max_dfs = get_min_max_dfs(symbols)
+    dfs_res = {}
+    for delta in DELTAS:
+        df_res = pd.DataFrame(columns=['date'])
+        df_res.set_index('date', inplace=True)
 
-    df_res['near_max'] = df_max.apply(count_trues, axis=1)
-    df_res['near_min'] = df_min.apply(count_trues, axis=1)
+        df_res['near_min'] = min_max_dfs.dfs_min[delta].apply(count_trues, axis=1)
+        df_res['near_max'] = min_max_dfs.dfs_max[delta].apply(count_trues, axis=1)
 
-    return df_res
+        dfs_res[delta] = df_res
+        print(f"DONE computing min & max for {delta}", flush=True)
+    return dfs_res
 
-def save_daily_results(df):
-    ax = df.plot(color=[RED, BLUE], figsize=(20,10))
-    ax.set_title(f"Percentage of stocks within {MAX_DELTA_PER * 100}% of 52 week min/max.")
-    ax.set_xlabel("")
-    ax.axhline(y=df['near_max'].mean(), linestyle='--', color=RED)
-    ax.axhline(y=df['near_min'].mean(), linestyle='--', color=BLUE)
-
+def save_daily_results(df, delta):
     curr_date = "{:%Y_%m_%d}".format(datetime.now())
+    prefix = env_prefix()
 
-    env_prefix = "" if is_prod() else "dev_"
+    ## Save the figures
 
-    fig = ax.get_figure()
-    fig.savefig(f"{BUCKET_DIR}/{env_prefix}per_high_low_{curr_date}.png")
-    fig.savefig(f"{BUCKET_DIR}/{env_prefix}per_high_low_latest.png")
-    make_blob_public(BUCKET_NAME, f"{env_prefix}per_high_low_latest.png")
+    # ax = get_min_max_plot(df, delta)
+    # fig = ax.get_figure()
+    # fig.savefig(f"{BUCKET_DIR}/{env_prefix}per_high_low_{curr_date}.png")
+    # fig.savefig(f"{BUCKET_DIR}/{env_prefix}per_high_low_latest.png")
 
+    df_alt = df.dropna(thresh=1)
+    data_alt = df_alt.reset_index().melt('date')
+    chart = get_min_max_chart(data_alt)
+
+    with alt.data_transformers.enable(max_rows=None):
+        print(f'{BUCKET_DIR}/{prefix}per_high_low_{curr_date}.html')
+        chart.save(f'{BUCKET_DIR}/{prefix}per_high_low_{delta}_{curr_date}.html', embed_options={'renderer':'svg'})
+        chart.save(f'{BUCKET_DIR}/{prefix}per_high_low_{delta}_latest.html', embed_options={'renderer':'svg'})
+
+    make_blob_public(BUCKET_NAME, f"{prefix}per_high_low_{delta}_latest.html")
+
+    # Save the metadata
     data = {
         'near_max' : df.iloc[-1].near_max,
         'near_min' : df.iloc[-1].near_min,
         'avg_near_max' : df["near_max"].mean(),
         'avg_near_min' : df["near_min"].mean(),
-        'max_delta_per' : MAX_DELTA_PER
-
+        'max_delta_per' : delta
     }
 
-    with open(f'{BUCKET_DIR}/{env_prefix}per_high_low_{curr_date}.json', 'w') as f:
+    with open(f'{BUCKET_DIR}/{prefix}per_high_low_{delta}_{curr_date}.json', 'w') as f:
         json.dump(data, f)
-    with open(f'{BUCKET_DIR}/{env_prefix}per_high_low_latest.json', 'w') as f:
+    with open(f'{BUCKET_DIR}/{prefix}per_high_low_{delta}_latest.json', 'w') as f:
         json.dump(data, f)
-    make_blob_public(BUCKET_NAME, f"{env_prefix}per_high_low_latest.json")
+
+    make_blob_public(BUCKET_NAME, f"{prefix}per_high_low_{delta}_latest.json")
+
+def close_store():
+    try:
+        store.close()
+        print("Successfully closed `store` file.")
+    except Exception as e:
+        print("Error close `store` file:", e)
 
 def main():
     all_symbols = get_symbols(token=IEX_TOKEN)
     symbols_df = all_symbols[FIRST_SYMBOL_IDX:LAST_SYMBOL_IDX]
     symbols = [symbol_metadata['symbol'] for _, symbol_metadata in symbols_df.iterrows()]
     print(f"DONE retrieving {len(all_symbols)} symbols. About to process {FIRST_SYMBOL_IDX} to {LAST_SYMBOL_IDX}", flush=True)
-    (df_min, df_max) = get_min_max_dfs(symbols)
-    try:
-        store.close()
-        print("Successfully closed `store` file.")
-    except Exception as e:
-        print("Error close `store` file:", e)
-    print("DONE computing dfs", flush=True)
-    df_res = compute_stocks_near_max_min(df_max, df_min)
-    print("DONE computing min & max", flush=True)
-    save_daily_results(df_res)
+    dfs_res = get_min_max_dfs(symbols)
+    print("DONE computing get_min_max_dfs.", flush=True)
+    close_store()
+    for delta in DELTAS: save_daily_results(dfs_res[delta])
     print("DONE saving results.", flush=True)
 
 if __name__ == "__main__":
