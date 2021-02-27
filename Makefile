@@ -26,6 +26,30 @@ DOCKER_PASSWORD := $(shell cat ${DOCKER_PASSWORD_JSON})
 
 ####### General #######
 
+.PHONE: help_me_daniel
+help_me:
+	@echo "" \
+		"GCLOUD commands\n" \
+		"\tRecreate the cluster: make gcloud_create_cluster\n" \
+		"\tAutheticate: make gcloud_auth_docker\n\n" \
+		"Bind the bucket locally:\n" \
+		"\tsudo mkdir -p /tmp/data/market_navigator/static_data\n" \
+		"\tsudo mkdir /Volumes/GCS/bucket\n" \
+		"\tchown -R olshansky /Volumes/GCS/bucket\n" \
+		"\tgcsfuse --debug_fuse --debug_gcs --debug_invariants market-navigator-data /Volumes/GCS/bucket\n\n" \
+		"Check min max dates:\n" \
+		"\tjupyter notebook\n" \
+		"\thttp://127.0.0.1:8888/notebooks/Read%20in%20cached%20data.ipynb\n\n" \
+		"Trigger the job::\n" \
+		"\tmake analysis_kube_create_job_gke\n\n" \
+		"Track costs and usage:\n" \
+		"\thttps://iexcloud.io/console/\n" \
+		"\thttps://console.cloud.google.com/kubernetes/list?project=market-navigator-281018\n\n" \
+		"Delete the cluster:\n" \
+		"\tgcloud container clusters delete market-navigator\n" \
+		"\tgcloud container clusters list\n" \
+
+
 .PHONY: format_build_args
 format_build_args:
 	$(eval BUILD_COMMIT:=$(shell git rev-parse --short HEAD))
@@ -62,6 +86,7 @@ gcr_list_images:
 .PHONY: gcloud_create_docker_secret
 ## Create the kubernetes docker registry secret.
 gcloud_create_docker_secret:
+	@echo $(DOCKER_PASSWORD)
 	kubectl create secret docker-registry gcr-json-key \
 		--save-config --dry-run=client \
     --docker-server=https://gcr.io \
