@@ -26,16 +26,17 @@ DOCKER_PASSWORD := $(shell cat ${DOCKER_PASSWORD_JSON})
 
 ####### General #######
 
-.PHONE: help_me_daniel
-help_me:
+.PHONE: help_periodic_manual_caching
+## Periodic cache of historical data
+help_periodic_manual_caching:
 	@echo "" \
 		"GCLOUD commands\n" \
-		"\tRecreate the cluster: make gcloud_create_cluster\n" \
+		"\tRecreate the cluster: make gcloud_create_cluster_medium\n" \
 		"\tAutheticate: make gcloud_auth_docker\n\n" \
 		"Bind the bucket locally:\n" \
 		"\tsudo mkdir -p /tmp/data/market_navigator/static_data\n" \
 		"\tsudo mkdir /Volumes/GCS/bucket\n" \
-		"\tchown -R olshansky /Volumes/GCS/bucket\n" \
+		"\tsudo chown -R olshansky /Volumes/GCS/bucket\n" \
 		"\tgcsfuse --debug_fuse --debug_gcs --debug_invariants market-navigator-data /Volumes/GCS/bucket\n\n" \
 		"Check min max dates:\n" \
 		"\tjupyter notebook\n" \
@@ -46,8 +47,14 @@ help_me:
 		"\thttps://iexcloud.io/console/\n" \
 		"\thttps://console.cloud.google.com/kubernetes/list?project=market-navigator-281018\n\n" \
 		"Delete the cluster:\n" \
-		"\tgcloud container clusters delete market-navigator\n" \
-		"\tgcloud container clusters list\n" \
+		"\tgcloud container clusters delete --zone us-west1-a market-navigator\n" \
+		"\tgcloud container clusters list\n\n" \
+		"Check and backup new data:\n" \
+		"\tVerify the new dates at http://127.0.0.1:8888/notebooks/Read%20in%20cached%20data.ipynb\n" \
+		"\tDownload and backup the file from https://console.cloud.google.com/storage/browser/market-navigator-data\n\n" \
+		"Debugging commands:\n" \
+		"\tsudo diskutil umount force  /Volumes/GCS/bucket\n" \
+		"\tgcsfuse --foreground --debug_fuse --debug_gcs --debug_invariants market-navigator-data /Volumes/GCS/bucket\n" \
 
 
 .PHONY: format_build_args
