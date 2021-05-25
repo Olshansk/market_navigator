@@ -154,40 +154,6 @@ gcloud_create_cluster_medium:
 gcloud_get_creds:
 	gcloud container clusters get-credentials market-navigator --zone us-west1-a
 
-####### API #######
-
-.PHONY: api_kube_create
-## API: Create all API Kubernetes workloads.
-api_kube_create:
-	kubectl create -f api
-
-.PHONY: api_docker_push
-## API: Delete all API Kubernetes workloads.
-api_kube_delete:
-	kubectl delete deployment api | true
-	kubectl delete service api | true
-
-.PHONY: api_docker_build
-## API: Build API docker image.
-api_docker_build: format_build_args
-	$(eval IMAGE:=market_navigator_api)
-
-	eval $$(minikube -p minikube docker-env) && \
-	docker build \
-		--build-arg BUILD_COMMIT=$(BUILD_COMMIT) \
-		--build-arg BUILD_TIME=$(BUILD_TIME) \
-		--file api/Dockerfile \
-		./api \
-		-t $(GCR_HOSTNAME)/$(PROJECT_ID)/$(IMAGE):$(BUILD_COMMIT) && \
-	docker tag $(GCR_HOSTNAME)/$(PROJECT_ID)/$(IMAGE):$(BUILD_COMMIT) $(GCR_HOSTNAME)/$(PROJECT_ID)/$(IMAGE):latest
-
-.PHONY: api_docker_push
-## API - Push API docker image.
-api_docker_push:
-	$(eval IMAGE:=market_navigator_api)
-	eval $$(minikube docker-env) && \
-		docker push $(GCR_HOSTNAME)/$(PROJECT_ID)/$(IMAGE):latest
-
 ####### Analysis #######
 
 .PHONY: analysis_kube_create_cf
