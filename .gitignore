@@ -1,4 +1,5 @@
 .DS_Store
+.vscode
 venv
 *.h5
 api/app/__pycache__/

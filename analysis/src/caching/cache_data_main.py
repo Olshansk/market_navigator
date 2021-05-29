@@ -1,21 +1,17 @@
-import argparse
-import tables
 import logging
 import os
-import time
 import warnings
-import requests_cache
-import pandas as pd
-
-from iexfinance.refdata import get_symbols
 from datetime import datetime
-from analysis.src.caching import HistoricalDataCacher
 
+import pandas as pd
+import requests_cache
+import tables
+from iexfinance.refdata import get_symbols
+
+from src.caching.iex_data_cacher import HistoricalDataCacher
 
 if os.getenv("ENVIRONMENT") == "PROD":
     os.environ["IEX_API_VERSION"] = "iexcloud-v1"
-    RATE_LIMIT_REQUESTS = 100
-    RATE_LIMIT_SLEEP = 10
     IEX_TOKEN = os.getenv("IEX_TOKEN", "pk_5839e587dee649c7a3653e6fbadf7230")
     FIRST_SYMBOL_IDX = int(os.getenv("FIRST_SYMBOL_IDX"), "0")
     LAST_SYMBOL_IDX = int(os.getenv("LAST_SYMBOL_IDX"), "-1")
@@ -29,10 +25,8 @@ else:
     FIRST_SYMBOL_IDX = 0
     LAST_SYMBOL_IDX = 11
     NUM_YEARS_HISTORY = 4
-    RATE_LIMIT_REQUESTS = 1000000
-    RATE_LIMIT_SLEEP = 10
-    START_DATE = datetime.strptime("2020-08-25", '%Y-%m-%d')
-    END_DATE = datetime.strptime("2020-12-12", '%Y-%m-%d')
+    START_DATE = datetime.strptime("2020-08-25", "%Y-%m-%d")
+    END_DATE = datetime.strptime("2020-12-12", "%Y-%m-%d")
 
 
 def main():
@@ -47,7 +41,7 @@ def main():
     store = pd.HDFStore("dev_iex_store.h5")
     logging.info("Done loading store into memory.", flush=True)
 
-    data_cacher = HistoricalDataCacher(symbols, store)
+    data_cacher = HistoricalDataCacher(IEX_TOKEN, symbols, store, NUM_YEARS_HISTORY, START_DATE, END_DATE)
     data_cacher.cache_data()
     logging.info("Done caching data.", flush=True)
 
