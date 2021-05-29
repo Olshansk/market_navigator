@@ -17,10 +17,10 @@ from iexfinance.refdata import get_symbols, get_iex_symbols
 from iexfinance.stocks import get_historical_data
 from iexfinance.altdata import get_social_sentiment
 from iexfinance.stocks import Stock
-from iex_helpers.caching import get_historical_data_cached
-from altair_helpers.graphs import get_min_max_chart
-from matplotlib_helpers.graphs import get_min_max_plot
-from gcloud_helpers.permissions import make_blob_public
+from analysis.src.iex_helpers.caching import get_historical_data_cached
+from analysis.src.altair_helpers.graphs import get_min_max_chart
+from analysis.src.matplotlib_helpers.graphs import get_min_max_plot
+from analysis.src.gcloud_helpers.permissions import make_blob_public
 
 from google.cloud import storage
 
@@ -79,7 +79,8 @@ else:
     IEX_TOKEN = "Tpk_57fa15c2c86b4dadbb31e0c1ad1db895"
     if not os.path.exists(BUCKET_DIR):
         BUCKET_DIR = "."
-        store = pd.HDFStore(f'../dev_iex_store.h5')
+        store = pd.HDFStore('dev_iex_store.h5')
+        # store = pd.HDFStore(f'../../notebooks/dev_iex_store.h5')
     requests_cache.install_cache('iex_cache')
     FIRST_SYMBOL_IDX = 0
     LAST_SYMBOL_IDX = 11
