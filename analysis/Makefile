@@ -25,4 +25,4 @@ cache_iex_data:
 .PHONY: test_cache_iex_data
 ## Cache historical data from IEXCloud
 test_cache_iex_data:
-	python -m pytest -vv tests
+	python -m pytest -s -vv tests

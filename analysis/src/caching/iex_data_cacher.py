@@ -90,8 +90,8 @@ class HistoricalDataCacher:
         end_date: datetime.datetime = None,
     ) -> None:
         self.iex_token = iex_token
-        self.store = store
         self.symbols = symbols
+        self.store = store
         self.num_historical_years = num_historical_years
         self.start_date = start_date
         self.end_date = end_date
@@ -104,7 +104,7 @@ class HistoricalDataCacher:
         if None not in (self.start_date, self.end_date):
             return (self.start_date, self.end_date)
 
-        end_date = datetime.now()
+        end_date = datetime.datetime.now()
         start_date = end_date - relativedelta(years=self.num_historical_years)
         # Need to add a delta because 15 years is the max: https://iexcloud.io/docs/api/#historical-prices
         start_date += (
@@ -145,9 +145,10 @@ class HistoricalDataCacher:
                     self._flush_store()
                     time.sleep(self.RATE_LIMIT_SLEEP)
                     num_requests_since_last_sleep = 0
-            except Exception as e:
-                logging.error(f"Failed to process {symbol}")
-                # logging.exception(f"Failed to process {symbol}")
+            except:
+                logging.exception(f"Failed to process {symbol}")
 
     def cache_data(self):
         self._cache_data()
+        self._flush_store()
+        self._close_store()

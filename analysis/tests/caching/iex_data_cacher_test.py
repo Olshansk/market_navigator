@@ -1,18 +1,42 @@
-import pytest
+import os
 import logging
 import pandas as pd
 
 from datetime import datetime
 from src.caching.iex_data_cacher import HistoricalDataCacher
 
+os.environ["IEX_API_VERSION"] = "iexcloud-sandbox"
 IEX_TOKEN = "Tpk_57fa15c2c86b4dadbb31e0c1ad1db895"
 
-def test_iex_data_cache():
+def test_iex_data_cache(capsys):
+    store_filename = "test_iex_store.h5"
     symbols = ['A', 'AA', 'AAA']
-    store = pd.HDFStore("dev_iex_store.h5")
-    logging.info("Done loading store into memory.", flush=True)
+    num_years = 1
+    start_date = datetime.strptime("2020-08-25", "%Y-%m-%d")
+    end_date = datetime.strptime("2020-12-12", "%Y-%m-%d")
 
-    data_cacher = HistoricalDataCacher(IEX_TOKEN, symbols, store, NUM_YEARS_HISTORY, START_DATE, END_DATE)
-    # data_cacher = HistoricalDataCacher(IEX_TOKEN, symbols, store, 1)
-    # data_cacher.cache_data()
-    # logging.info("Done caching data.", flush=True)
+    os.remove(store_filename)
+    store = pd.HDFStore(store_filename)
+
+    assert len(store) == 0
+    assert store.keys() == []
+
+    captured = capsys.readoutstd()
+
+
+    data_cacher = HistoricalDataCacher(IEX_TOKEN, symbols, store, num_years, start_date, end_date)
+    data_cacher.cache_data()
+    store = pd.HDFStore(store_filename)
+
+    print('OLSH', captured.out)
+    print('OLSH', captured.err)
+
+    assert len(store) == 3
+    assert store.keys() == ['/A', '/AA', '/AAA']
+
+    aa_df = store['AA']
+    assert list(aa_df.columns) == ['close', 'volume']
+    assert min(aa_df.index) == pd.Timestamp('2020-08-25 00:00:00')
+    assert max(aa_df.index) == pd.Timestamp('2020-12-11 00:00:00')
+
+
