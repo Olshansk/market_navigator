@@ -26,7 +26,7 @@ DOCKER_PASSWORD := $(shell cat ${DOCKER_PASSWORD_JSON})
 
 ####### General #######
 
-.PHONE: help_periodic_manual_caching
+.PHONY: help_periodic_manual_caching
 ## Periodic cache of historical data
 help_periodic_manual_caching:
 	@echo "" \
