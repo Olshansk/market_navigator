@@ -9,6 +9,9 @@ def zscore(x, window):
 
 def compute_mm_metrics_for_ticker(df_full, ticker, window=200):
     df = df_full[df_full.ticker == ticker].copy()
+    if len(df) == 0:
+        return None
+
     df['price_roll_avg_200'] = df['price'].rolling(window).mean()
     df['mayer_multiple'] = df['price'] / df['price_roll_avg_200']
     df['mm_z_score'] = zscore(df['mayer_multiple'], window)

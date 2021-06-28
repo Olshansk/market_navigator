@@ -5,40 +5,52 @@
   <body>
     <div class="min-w-popup">
       <!-- Referenced from https://dberri.com/lets-build-a-tab-navigation-with-alpine-js/ -->
-      <div x-data="initMarket()", x-init="updateMarketState($refs.market_table)" id="tab_wrapper">
-
+      <div
+        x-data="initMarket()"
+        ,
+        x-init="updateMarketState($refs.market_table)"
+        id="tab_wrapper"
+      >
         <!-- The tabs navigation -->
         <nav class="bg-gray-100 text-gray-800">
           <ul class="flex">
-            <li >
-              <a class="navigator-tab"
-                 x-bind:class="{ 'active': tab === 'market' }"
-                 x-on:click.prevent="tab = 'market'"
-                 href="#">
+            <li>
+              <a
+                class="navigator-tab"
+                x-bind:class="{ 'active': tab === 'market' }"
+                x-on:click.prevent="tab = 'market'"
+                href="#"
+              >
                 Market
               </a>
             </li>
             <li>
-              <a class="navigator-tab"
-                 x-bind:class="{ 'active': tab === 'stockrow' }"
-                 x-on:click.prevent="tab = 'stockrow'"
-                 href="#">
+              <a
+                class="navigator-tab"
+                x-bind:class="{ 'active': tab === 'stockrow' }"
+                x-on:click.prevent="tab = 'stockrow'"
+                href="#"
+              >
                 Stockrow
               </a>
             </li>
             <li>
-              <a class="navigator-tab"
-                 x-bind:class="{ 'active': tab === 'crypto' }"
-                 x-on:click.prevent="tab = 'crypto'"
-                 href="#">
+              <a
+                class="navigator-tab"
+                x-bind:class="{ 'active': tab === 'crypto' }"
+                x-on:click.prevent="tab = 'crypto'"
+                href="#"
+              >
                 Crypto
               </a>
             </li>
             <li>
-              <a class="navigator-tab"
-                 x-bind:class="{ 'active': tab === 'coming_soon' }"
-                 x-on:click.prevent="tab = 'coming_soon'"
-                 href="#">
+              <a
+                class="navigator-tab"
+                x-bind:class="{ 'active': tab === 'coming_soon' }"
+                x-on:click.prevent="tab = 'coming_soon'"
+                href="#"
+              >
                 Coming Soon
               </a>
             </li>
@@ -48,49 +60,100 @@
         <!-- The tabs content -->
         <div x-show="tab === 'market'">
           <div class="m-3">
-            A list of metrics I use to understand the state of the market as a whole is.
+            A list of metrics I use to understand the state of the market as a
+            whole is.
           </div>
           <table x-ref="market_table" class="table table-striped">
-           <thead>
-             <tr>
-               <th scope="col">Metric</th>
-               <th scope="col">Description</th>
-             </tr>
-           </thead>
-           <tbody>
-             <tr>
-               <th scope="row">Near Max</th>
-               <td id="topStocksLabel" class="control-label static-text"></td>
-             </tr>
-             <tr>
-               <th scope="row">Near Min</th>
-               <td id="bottomStocksLabel" class="control-label static-text"></td>
-             </tr>
-           </tbody>
+            <thead>
+              <tr>
+                <th scope="col">Metric</th>
+                <th scope="col">Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">Near Max</th>
+                <td id="topStocksLabel" class="control-label static-text"></td>
+              </tr>
+              <tr>
+                <th scope="row">Near Min</th>
+                <td
+                  id="bottomStocksLabel"
+                  class="control-label static-text"
+                ></td>
+              </tr>
+            </tbody>
           </table>
 
           <div class="justify-center">
-           <a href="https://storage.googleapis.com/market-navigator-data/per_high_low_latest.png" target="_blank">
-             <img class="mx-auto" id="imageresource" src="https://storage.googleapis.com/market-navigator-data/per_high_low_latest.png" style="width: 900px; height: 300px;"/>
-           </a>
+            <a
+              href="https://storage.googleapis.com/market-navigator-data/per_high_low_latest.png"
+              target="_blank"
+            >
+              <img
+                class="mx-auto"
+                id="imageresource"
+                src="https://storage.googleapis.com/market-navigator-data/per_high_low_latest.png"
+                style="width: 900px; height: 300px"
+              />
+            </a>
           </div>
         </div>
         <div x-show="tab === 'stockrow'">
           <div class="m-3">
-            <a class="underline text-blue-600" target_="_blank" href="https://stockrow.com">Stockrow</a> is the best website I've found that makes financial data easy to access and interpret.
+            <a
+              class="underline text-blue-600"
+              target_="_blank"
+              href="https://stockrow.com"
+              >Stockrow</a
+            >
+            is the best website I've found that makes financial data easy to
+            access and interpret.
           </div>
-          <li><a class="underline text-blue-600" target="_blank" href="https://stockrow.com/screener/39ad3ccc-4980-47b9-93eb-62af3a1f60b0">This screener</a> is a good starting point for somewhat financially stable midcap companies.</li>
-          <li><a class="underline text-blue-600" target="_blank" href="https://stockrow.com/screener/1f75c97a-b652-4539-bdd4-7e7c5fdedf82">This filter</a> is what I use to do a preliminary evaluation before diving deep into any single company.</li>
+          <li>
+            <a
+              class="underline text-blue-600"
+              target="_blank"
+              href="https://stockrow.com/screener/39ad3ccc-4980-47b9-93eb-62af3a1f60b0"
+              >This screener</a
+            >
+            is a good starting point for somewhat financially stable midcap
+            companies.
+          </li>
+          <li>
+            <a
+              class="underline text-blue-600"
+              target="_blank"
+              href="https://stockrow.com/screener/1f75c97a-b652-4539-bdd4-7e7c5fdedf82"
+              >This filter</a
+            >
+            is what I use to do a preliminary evaluation before diving deep into
+            any single company.
+          </li>
         </div>
         <div x-show="tab === 'crypto'">
           <div class="flex justify-center">
-            <a class="twitter-timeline" data-tweet-limit="1" data-lang="en" data-width="600" href="https://twitter.com/TIPMayerMultple?ref_src=twsrc%5Etfw">Tweets by TIPMayerMultple</a>
-            <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+            <a
+              class="twitter-timeline"
+              data-tweet-limit="1"
+              data-lang="en"
+              data-width="600"
+              href="https://twitter.com/TIPMayerMultple?ref_src=twsrc%5Etfw"
+              >Tweets by TIPMayerMultple</a
+            >
+            <script
+              async
+              src="https://platform.twitter.com/widgets.js"
+              charset="utf-8"
+            ></script>
           </div>
         </div>
         <div x-show="tab === 'coming_soon'">
           <div class="m-3">
-            <p>Come back for momentum, deep value and other more interactive tools coming soon!</p>
+            <p>
+              Come back for momentum, deep value and other more interactive
+              tools coming soon!
+            </p>
           </div>
         </div>
       </div>
