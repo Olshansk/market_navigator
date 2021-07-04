@@ -235,3 +235,10 @@ analysis_docker_push:
 ## Zip up the chrome extension
 chrome_extension_zip:
 	zip -r market_navigator.zip chrome_extension/extension
+
+.PHONY: format_all_the_things
+## Python cleanup & formatting
+format_all_the_things:
+	autoflake .
+	black .
+	isort .

@@ -7,7 +7,6 @@ import pandas as pd
 import requests_cache
 import tables
 from iexfinance.refdata import get_symbols
-
 from src.caching.iex_data_cacher import HistoricalDataCacher
 
 if os.getenv("ENVIRONMENT") == "PROD":
@@ -41,7 +40,9 @@ def main():
     store = pd.HDFStore("dev_iex_store.h5")
     logging.info("Done loading store into memory.", flush=True)
 
-    data_cacher = HistoricalDataCacher(IEX_TOKEN, symbols, store, NUM_YEARS_HISTORY, START_DATE, END_DATE)
+    data_cacher = HistoricalDataCacher(
+        IEX_TOKEN, symbols, store, NUM_YEARS_HISTORY, START_DATE, END_DATE
+    )
     data_cacher.cache_data()
     logging.info("Done caching data.", flush=True)
 

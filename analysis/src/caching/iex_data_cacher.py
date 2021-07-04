@@ -1,11 +1,12 @@
 import datetime
 import logging
 import time
-from typing import List, Any, Optional
+from typing import Any, List, Optional
 
 import pandas as pd
 from dateutil.relativedelta import relativedelta
 from iexfinance.stocks import get_historical_data
+
 
 # Assumptions:
 # 1. No missing data in existing dataframes in the store; data is complete between (date_min, date_max).
@@ -16,7 +17,8 @@ def _update_store_data(
     symbol: str,
     start_date: datetime.datetime,
     end_date: datetime.datetime,
-    **kwargs: Optional[Any]):
+    **kwargs: Optional[Any],
+):
 
     # This is necessary to avoid fetching new data if the hours/minutes/seconds changed.
     def _sanitize_date(date):
@@ -46,10 +48,14 @@ def _update_store_data(
         df = store[symbol]
         metadata = store.get_storer(symbol).attrs.metadata
 
-        logging.debug(f"{symbol}: Data is catched between {metadata['min_date']} and {metadata['max_date']}.")
+        logging.debug(
+            f"{symbol}: Data is catched between {metadata['min_date']} and {metadata['max_date']}."
+        )
 
         if start_date < metadata["min_date"]:
-            logging.debug(f"{symbol}: Requesting data between {start_date} and {metadata['min_date']}.")
+            logging.debug(
+                f"{symbol}: Requesting data between {start_date} and {metadata['min_date']}."
+            )
             df = df.append(
                 _format_df_columns(
                     get_historical_data(
@@ -60,7 +66,9 @@ def _update_store_data(
             metadata["min_date"] = start_date
 
         if end_date > metadata["max_date"]:
-            logging.debug(f"{symbol}: Requesting data between {metadata['max_date']} and {end_date}.")
+            logging.debug(
+                f"{symbol}: Requesting data between {metadata['max_date']} and {end_date}."
+            )
             df = df.append(
                 _format_df_columns(
                     get_historical_data(
@@ -108,7 +116,9 @@ class HistoricalDataCacher:
         start_date = end_date - relativedelta(years=self.num_historical_years)
         # Need to add a delta because 15 years is the max: https://iexcloud.io/docs/api/#historical-prices
         start_date += (
-            relativedelta(days=7) if self.num_historical_years >= 15 else relativedelta(days=0)
+            relativedelta(days=7)
+            if self.num_historical_years >= 15
+            else relativedelta(days=0)
         )
         return (start_date, end_date)
 

@@ -1,60 +1,46 @@
 import datetime
 import json
+import os
+import logging
+# TODO: Remove this
+import sys
+sys.path.append("..")
+from time import gmtime
 from typing import Optional
 from fastapi import FastAPI
-from time import gmtime
-from fastapi import Depends
 
-import logging
-import pandas as pd
 
-import sys
-sys.path.append('..')
+from api.files.keys import get_json_key
+from api.files.s3 import file_last_modified_timestamp, download_file
+from api.data.reader import read_full_df
+from api.data.processor import compute_new_data
 
-from analysis.src.mayer_multiple.compute_metrics import compute_mm_metrics_for_ticker, format_message
-from analysis.src.mayer_multiple.plot_metrics import build_mm_histogram
-from api.files.s3 import upload_file, file_exists
 
-def _read_in_data():
-    df_full = pd.read_feather('/Users/olshansky/workspace/tip/daily_data.feather')
-    df_full.set_index('date')
-    df_full.index = pd.to_datetime(df_full['date'])
-    return df_full.sort_index()
-
-def _compute_new_data(ticker, key):
-    df = compute_mm_metrics_for_ticker(df_full, ticker)
-    if df is None: raise Exception(f'Data for {ticker} does not exist.')
-    logging.debug(f'Computing data for {ticker}.')
-    (chart, _) = build_mm_histogram(df)
-
-    filename = f'/tmp/{key}'
-    data = {
-        'message': format_message(df, ticker),
-        'chart': chart.to_json()
-    }
-    with open(filename, 'w') as f:
-        json.dump(data, f)
-    upload_file(filename, key=key)
+def _updated_today(date: Optional[datetime.datetime]) -> bool:
+    return date and gmtime().tm_mday == date.day
 
 
 app = FastAPI()
-df_full = _read_in_data()
+df = read_full_df()  # Warmup
 
-@app.get("/charts/mayer_multiple/{ticker}")
+
+@app.get("/charts/mayer_multiple/png/{ticker}")
 def get_data_for_ticker(ticker: str):
-    logging.debug(f'Retrieving data for {ticker}.')
-    key = f'mm_chart_{ticker}.json'
-    date = file_exists(key)
-    if not date or gmtime().tm_mday != date.day:
+    logging.debug(f"Retrieving data for {ticker}.")
+    key = get_json_key(ticker)
+    date = file_last_modified_timestamp(key)
+    local_file = f'/tmp/{ticker}.cache'
+    if not _updated_today(date) and not compute_new_data(ticker, df):
         try:
-            _compute_new_data(ticker, key)
-        except Exception as e:
-            logging.error(e)
-            return {
-                'message': 'Error',
-                'error_message': f'Data for {ticker} does not exists'
-            }
-    return {
-        'message': 'message',
-        'chart': key
-    }
+            os.remove(local_file)
+        except OSError:
+            pass
+        return {"message": f"Data for {ticker} does not exists", 'img': ''}
+    if os.path.isfile(local_file):
+        logging.debug(f"Cache file {local_file} found.")
+    else:
+        download_file(key, local_file)
+
+    with open(local_file, 'r') as f:
+        data = json.load(f)
+        return {"message": data["message"], "img": data['png']}

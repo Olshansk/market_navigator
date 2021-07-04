@@ -1,5 +1,7 @@
 import os
+
 from google.cloud import storage
+
 
 def _make_blob_public(bucket_name, blob_name):
     storage_client = storage.Client()
@@ -7,13 +9,14 @@ def _make_blob_public(bucket_name, blob_name):
     blob = bucket.blob(blob_name)
     blob.make_public()
 
+
 def make_blob_public(bucket_name, blob_name):
     """Makes a blob publicly accessible."""
-    if 'GOOGLE_APPLICATION_CREDENTIALS' not in os.environ:
+    if "GOOGLE_APPLICATION_CREDENTIALS" not in os.environ:
         print("APPLICATION_CREDENTIALS not defined. Not making blob public.")
         return
 
-    if not blob_name.startswith('/'):
+    if not blob_name.startswith("/"):
         print("Blob name must be an absolute path")
         return
 
