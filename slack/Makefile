@@ -21,3 +21,7 @@ help:
 ## Run local API server (https://fastapi.tiangolo.com/)
 run_fast_api_server:
 	uvicorn app:api --reload --port 3000 --log-level warning
+
+.PHONY: configure_slash_commands_url
+## Echo the link required to update local development
+	@echo "https://api.slack.com/apps/A0270GW121Y/slash-commands?"

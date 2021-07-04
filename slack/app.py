@@ -4,8 +4,6 @@ logging.basicConfig(level=logging.DEBUG)
 
 import os
 
-import json
-import requests
 from fastapi import FastAPI, Request
 from slack_bolt.adapter.fastapi.async_handler import AsyncSlackRequestHandler
 from slack_bolt.async_app import AsyncApp
