@@ -21,7 +21,7 @@ def _updated_today(date: Optional[datetime.datetime]) -> bool:
 
 
 app = FastAPI()
-df = read_daily_data_df()  # Warmup
+df = read_daily_data_df()
 
 
 @app.get("/charts/mayer_multiple/png/{ticker}")

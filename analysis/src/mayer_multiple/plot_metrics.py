@@ -84,7 +84,7 @@ def build_mm_histogram(df: pd.DataFrame):
     # Put all the layers into a chart and bind the data
     chart = (
         alt.layer(bar, selectors, points, points_text, vertline, vertline_text)
-        .encode(x=alt.X("x:Q", title="test"))
+        .encode(x=alt.X("x:Q", title=""))
         .properties(width=600, height=300)
     )
 

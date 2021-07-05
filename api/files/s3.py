@@ -23,7 +23,6 @@ def file_last_modified_timestamp(key):
     """Returns last modified date if exists or None otherwise."""
     try:
         res = s3_client.head_object(Bucket=BUCKET, Key=key)
-        logging.debug(res)
         date = datetime.datetime.strptime(
             res["ResponseMetadata"]["HTTPHeaders"]["last-modified"], DATE_FORMAT
         )
