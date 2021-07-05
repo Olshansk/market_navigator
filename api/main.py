@@ -12,7 +12,7 @@ from fastapi import FastAPI
 
 from api.files.keys import get_json_key
 from api.files.s3 import file_last_modified_timestamp, download_file
-from api.data.reader import read_full_df
+from api.data.reader import read_daily_data_df
 from api.data.processor import compute_new_data
 
 
@@ -21,7 +21,7 @@ def _updated_today(date: Optional[datetime.datetime]) -> bool:
 
 
 app = FastAPI()
-df = read_full_df()  # Warmup
+df = read_daily_data_df()  # Warmup
 
 
 @app.get("/charts/mayer_multiple/png/{ticker}")

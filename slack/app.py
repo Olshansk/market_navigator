@@ -7,10 +7,6 @@ import os
 from fastapi import FastAPI, Request
 from slack_bolt.adapter.fastapi.async_handler import AsyncSlackRequestHandler
 from slack_bolt.async_app import AsyncApp
-# TODO: Remove this
-import sys
-sys.path.append("..")
-
 from slash_commands.market_navigator import prepare_mm_body
 
 app = AsyncApp(
@@ -26,7 +22,7 @@ async def _market_navigator_ack(ack, body):
         await ack(f":x: Usage: /market_navigator (ticker)")
     else:
         # TODO: Validate ticker here.
-        await ack(f"Crunching data for {body['text']}")
+        await ack(f"Crunching data for {body['text']}...")
 
 async def _market_navigator_compute(body, logger, respond):
     ticker = body["text"]
