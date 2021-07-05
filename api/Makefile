@@ -1,10 +1,7 @@
 .SILENT:
 .PHONY: help
 
-# Reference: https://gist.github.com/rcmachado/af3db315e31383502660
-
 ## This help screen
-
 help:
 	printf "Available targets\n\n"
 	awk '/^[a-zA-Z\-\_0-9]+:/ { \
@@ -17,40 +14,41 @@ help:
 	} \
 	{ lastLine = $$0 }' $(MAKEFILE_LIST)
 
-.PHONY: run_fast_api_server
+.PHONY: fastapi_run_server
 ## Run local API server (https://fastapi.tiangolo.com/)
-run_fast_api_server:
-	uvicorn main:app --reload
+fastapi_run_server:
+	uvicorn main:app --reload --log-level=debug --host=0.0.0.0 --port=8000
 
-.PHONY: curl_goog_mm
-## Curl GOOGL Mayer Multiple Helper
+TICKER ?= GOOGL
+.PHONY: curl_mm_local
+## Curl local MM PNG chart (GOOGL by default)
 curl_goog_mm:
-	curl -X GET localhost:8000/charts/mayer_multiple/GOOGL
+	curl -X GET localhost:8000/charts/mayer_multiple/$(TICKER)/png | jq
 
-.PHONY: get_bucket_policy
+.PHONY: s3_get_bucket_policy
 ## Get bucket policy for cdn.olshansky.info
-get_bucket_policy:
+s3_get_bucket_policy:
 	aws s3api get-bucket-policy --bucket cdn.olshansky.info
 
-.PHONY: get_bucket_policy_to_json
+.PHONY: s3_get_bucket_policy_to_json
 ## Get bucket policy for cdn.olshansky.info
-get_bucket_policy_to_json:
+s3_get_bucket_policy_to_json:
 	aws s3api get-bucket-policy --bucket cdn.olshansky.info > /tmp/cdn_olshansky_info_policy.json
 	@echo "see /tmp/cdn_olshansky_info_policy.json"
 
-.PHONY: put_bucket_policy
+.PHONY: s3_put_bucket_policy
 ## Put bucket policy for cdn.olshansky.info
-put_bucket_policy:
+s3_put_bucket_policy:
 	aws s3api put-bucket-policy --bucket cdn.olshansky.info --policy file://cdn_olshansky_info_policy.json
 
-.PHONY: get_bucket_lifecycle
+.PHONY: s3_get_bucket_lifecycle
 ## Get bucket lifecycle for cdn.olshansky.info
-get_bucket_lifecycle:
+s3_get_bucket_lifecycle:
 	aws s3api get-bucket-lifecycle --bucket cdn.olshansky.info
 
-.PHONY: put_bucket_lifecycle
+.PHONY: s3_put_bucket_lifecycle
 ## Put bucket policy for cdn.olshansky.info
-put_bucket_lifecycle:
+s3_put_bucket_lifecycle:
 	aws s3api put-bucket-lifecycle-configuration --bucket my-bucket --lifecycle-configuration  file://lifecycle.json
 
 .PHONY: quandl_recompute
@@ -67,3 +65,23 @@ quandl_append:
 ## Hardcoded paths to append data to daily data on SD card
 quandl_download:
 	python data/reader.py download --output_path=/Volumes/SDCard/
+
+.PHONY: kubectl_argo_local
+## Local port forwarding to use argo with minikube for development
+kubectl_argo_local:
+	@echo "https://localhost:2746"
+	kubectl -n argo port-forward deployment/argo-server 2746:2746
+
+.PHONY: kubectl_argo_remote
+## Remote port forwarding to use argo with minikube for development
+kubectl_argo_remote:
+	@echo "https://127.0.0.1:2746"
+	kubectl -n argo port-forward --address 0.0.0.0 svc/argo-server 2746:2746 > /dev/null &
+
+.PHONY: python_format
+## All the python formatting
+python_format:
+	autoflake .
+	black .
+	isort .
+

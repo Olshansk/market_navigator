@@ -1,8 +1,8 @@
 import datetime
 import logging
+from typing import Optional
 
 import boto3
-from typing import Optional
 from boto3.s3.transfer import S3Transfer
 from botocore.exceptions import ClientError
 
@@ -49,6 +49,7 @@ def upload_file(file_name, bucket=BUCKET, key=None) -> Optional[str]:
     except ClientError as e:
         logging.error(e)
         return None
+
 
 def download_file(key: str, filename: str, bucket: str = BUCKET) -> None:
     s3_client.download_file(bucket, key, filename)
