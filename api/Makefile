@@ -54,17 +54,17 @@ s3_put_bucket_lifecycle:
 .PHONY: quandl_recompute
 ## Hardcoded paths to CSV paths on SD card to recompute daily data used for processing
 quandl_recompute:
-	python data/reader.py recompute --output_path=/Volumes/SDCard/Quandl_04_03_2021/daily_data.feather --sharadar_daily_path=/Volumes/SDCard/Quandl_04_03_2021/SHARADAR_DAILY.csv --sharadar_sep_path=/Volumes/SDCard/Quandl_04_03_2021/SHARADAR_SEP.csv
+	python data/writer.py recompute --output_dir=/Volumes/SDCard/Quandl --sharadar_daily_path=/Volumes/SDCard/Quandl/SHARADAR_DAILY.csv --sharadar_sep_path=/Volumes/SDCard/Quandl/SHARADAR_SEP.csv
 
 .PHONY: quandl_append
 ## Hardcoded paths to append data to daily data on SD card
 quandl_append:
-	python data/reader.py append --daily_data_path=/Volumes/SDCard/Quandl_04_03_2021/daily_data.feather
+	python data/writer.py append --daily_data_path=/Volumes/SDCard/Quandl/daily_data.feather
 
 .PHONY: quandl_download
 ## Hardcoded paths to append data to daily data on SD card
 quandl_download:
-	python data/reader.py download --output_path=/Volumes/SDCard/
+	python data/reader.py download --output_dir=/Volumes/SDCard/
 
 .PHONY: kubectl_argo_local
 ## Local port forwarding to use argo with minikube for development
