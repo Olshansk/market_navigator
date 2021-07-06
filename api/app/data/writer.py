@@ -21,6 +21,13 @@ def _merge_sep_and_daily_dfs(
     df_temp = df_sep[['ticker', 'date','closeadj']].copy().rename(columns={'closeadj': 'price'})
     return df_daily.merge(df_temp, on=['date', 'ticker'], how='inner').sort_values(by=['date'], inplace=False)
 
+def _format_df_for_h5(df: pd.DataFrame):
+    df.set_index("date")
+    df.index = pd.to_datetime(df["date"])
+    df = df.drop(columns=['date'])
+    df.sort_index(inplace=True)
+    return df
+
 def recompute_daily_data_from_csv(
     output_dir: str,
     sharadar_daily_path: str,
@@ -29,6 +36,7 @@ def recompute_daily_data_from_csv(
     logger.debug("About to load data from csv")
     daily_metrics = pd.read_csv(sharadar_daily_path)
     daily_prices = pd.read_csv(sharadar_sep_path)
+
     logger.debug("About to compute data from csv")
     df_temp = daily_prices[['ticker', 'date','closeadj']].copy().rename(columns={'closeadj': 'price'})
     daily_data = daily_metrics.merge(df_temp, on=['date', 'ticker'], how='inner')
@@ -41,10 +49,7 @@ def recompute_daily_data_from_csv(
     daily_data.to_feather(os.path.join(output_dir, 'daily_data.feather'))
 
     logger.debug("About to write full daily data to hdf5")
-    daily_data.set_index("date")
-    daily_data.index = pd.to_datetime(daily_data["date"])
-    daily_data = daily_data.drop(columns=['date'])
-    daily_data.sort_index(inplace=True)
+    daily_data = _format_df_for_h5(daily_data)
     try:
         write_daily_data_to_hdf(daily_data, output_dir)
     except:
@@ -54,8 +59,15 @@ def recompute_daily_data_from_csv(
         Try doing the following:
             ipython
             import pandas as pd
+
             df = pd.from_feather('{os.path.join(output_dir, 'daily_data.feather')}')
+            df.set_index("date")
+            df.index = pd.to_datetime(daily_data["date"])
+            df = daily_data.drop(columns=['date'])
+            df.sort_index(inplace=True)
             df.to_hdf({os.path.join(output_dir, 'daily_data.h5')}, key='daily_data', format='t', data_columns=['ticker'])
+
+            https://github.com/pandas-dev/pandas/issues/2773#issuecomment-56779269
         **************************************************************************
         """)
 
@@ -70,6 +82,7 @@ def write_daily_data_to_hdf(df: pd.DataFrame, output_dir: str):
         data_columns=['ticker'])
     store = pd.HDFStore(filename)
     store.get_storer('daily_data').attrs.last_date = df.index[-1].strftime('%Y-%m-%d')
+    store.get_storer('daily_data').attrs.tickers = ';'.join(list(df['ticker'].unique()))
     store.close()
 
 def append_to_daily_data_hdf(hdf_path: str) -> pd.DataFrame:
@@ -82,10 +95,7 @@ def append_to_daily_data_hdf(hdf_path: str) -> pd.DataFrame:
 
     logging.debug("About to process new data")
     new_data = _merge_sep_and_daily_dfs(new_daily_data, new_sep_data)
-    new_data.set_index("date")
-    new_data.index = pd.to_datetime(new_data["date"])
-    new_data = new_data.drop(columns=['date'])
-    new_data.sort_index(inplace=True)
+    new_data = _format_df_for_h5(new_data)
 
     store.append('daily_data', new_data)
     store.get_storer('daily_data').attrs.last_date = new_data.index[-1].strftime('%Y-%m-%d')

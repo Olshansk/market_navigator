@@ -42,9 +42,12 @@ def read_daily_data_from_feather(daily_data_path: str = DEV_FEATHER_PATH) -> pd.
     assert df.index.duplicated().sum() == 0, "Duplicate dates in daily data"
     return df
 
+def read_daily_data_from_hdf_store(store: pd.HDFStore, ticker: str):
+    return store.select('daily_data', where=f'ticker={ticker}')
+
 def read_daily_data_from_hdf(hdf_path: str, ticker: str):
     store = pd.HDFStore(hdf_path)
-    return store.select('daily_data', where=f'ticker={ticker}')
+    return read_daily_data_from_hdf_store(store, ticker)
 
 if __name__ == '__main__':
   fire.Fire({

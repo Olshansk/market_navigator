@@ -26,7 +26,7 @@ def file_last_modified_timestamp(key):
             res["ResponseMetadata"]["HTTPHeaders"]["last-modified"], DATE_FORMAT
         )
         return date
-    except ClientError as e:
+    except Exception as e:
         if e.response["Error"]["Code"] == "404":
             logging.debug(f"The object does not exist. {key}")
         else:
