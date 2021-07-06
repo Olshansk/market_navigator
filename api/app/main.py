@@ -11,18 +11,24 @@ from typing import Optional
 
 from fastapi import FastAPI
 
-from data.processor import compute_new_data
-from data.reader import read_daily_data_from_hdf
-from files.keys import get_json_key
-from files.s3 import download_file, file_last_modified_timestamp
+from app.data.processor import compute_new_data
+from app.data.reader import read_daily_data_from_hdf
+from app.files.keys import get_json_key
+from app.files.s3 import download_file, file_last_modified_timestamp, BUCKET_PRIVATE
 
+
+# DAILY_DATA_HDF5_PATH = os.getenv("DAILY_DATA_HDF5_PATH", "/Volumes/SDCard/Quandl/daily_data.h5")
+DAILY_DATA_HDF5_PATH = os.getenv("DAILY_DATA_HDF5_PATH", '/tmp/daily_data.h5')
 
 def _updated_today(date: Optional[datetime.datetime]) -> bool:
     return date and gmtime().tm_mday == date.day
 
+def _maybe_download_data_files():
+    if not os.path.isfile(DAILY_DATA_HDF5_PATH):
+        download_file('daily_data.h5', DAILY_DATA_HDF5_PATH, BUCKET_PRIVATE)
 
+_maybe_download_data_files()
 app = FastAPI()
-DAILY_DATA_HDF5_PATH = os.getenv("DAILY_DATA_HDF5_PATH", "/Volumes/SDCard/Quandl/daily_data.h5")
 
 @app.get("/charts/mayer_multiple/{ticker}/png")
 def get_data_for_ticker(ticker: str):

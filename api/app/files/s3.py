@@ -3,20 +3,19 @@ import logging
 from typing import Optional
 
 import boto3
-from boto3.s3.transfer import S3Transfer
 from botocore.exceptions import ClientError
 
-BUCKET = "cdn.olshansky.info"  # https://s3.console.aws.amazon.com/s3/buckets/cdn.olshansky.info?region=us-west-2&tab=objects
+# https://s3.console.aws.amazon.com/s3/buckets/cdn.olshansky.info?region=us-west-2&tab=objects
+BUCKET = "cdn.olshansky.info"
+BUCKET_PRIVATE = "market-navigator-private"
 DATE_FORMAT = "%a, %d %b %Y %H:%M:%S %Z"
 
 credentials = {
     "aws_access_key_id": "AKIAQE3OIS3UUOIHOFHR",
-    "aws_secret_access_key": "0xSv/VFXPYQpxAhyM2r4YM7M8nO56ItUzoNGkaT9aws_secret_access_key",
+    "aws_secret_access_key": "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",
 }
 
 s3_client = boto3.client("s3", "us-west-2", **credentials)
-s3_client = boto3.client("s3")
-transfer = S3Transfer(s3_client)
 
 
 def file_last_modified_timestamp(key):

@@ -17,7 +17,7 @@ help:
 .PHONY: fastapi_run_server
 ## Run local API server (https://fastapi.tiangolo.com/)
 fastapi_run_server:
-	uvicorn main:app --reload --log-level=debug --host=0.0.0.0 --port=8000
+	uvicorn app.main:app --reload --log-level=debug --host=0.0.0.0 --port=8000
 
 TICKER ?= GOOGL
 .PHONY: curl_mm_local
@@ -54,17 +54,27 @@ s3_put_bucket_lifecycle:
 .PHONY: quandl_recompute
 ## Hardcoded paths to CSV paths on SD card to recompute daily data used for processing
 quandl_recompute:
-	python data/writer.py recompute --output_dir=/Volumes/SDCard/Quandl --sharadar_daily_path=/Volumes/SDCard/Quandl/SHARADAR_DAILY.csv --sharadar_sep_path=/Volumes/SDCard/Quandl/SHARADAR_SEP.csv
+	python app/data/writer.py recompute --output_dir=/Volumes/SDCard/Quandl --sharadar_daily_path=/Volumes/SDCard/Quandl/SHARADAR_DAILY.csv --sharadar_sep_path=/Volumes/SDCard/Quandl/SHARADAR_SEP.csv
+
+.PHONY: quandl_recompute_test
+## Hardcoded paths to CSV paths on SD card to recompute daily data used for processing
+quandl_recompute_test:
+	python app/data/writer.py recompute --output_dir=/Volumes/SDCard/Quandl/small --sharadar_daily_path=/Volumes/SDCard/Quandl/small/SHARADAR_DAILY.csv --sharadar_sep_path=/Volumes/SDCard/Quandl/small/SHARADAR_SEP.csv
+
+.PHONY: quandl_append_test
+## Hardcoded paths to append data to daily data on SD card
+quandl_append_test:
+	python app/data/writer.py append --daily_data_path=/Volumes/SDCard/Quandl/small/daily_data.feather
 
 .PHONY: quandl_append
 ## Hardcoded paths to append data to daily data on SD card
 quandl_append:
-	python data/writer.py append --daily_data_path=/Volumes/SDCard/Quandl/daily_data.feather
+	python app/data/writer.py append --daily_data_path=/Volumes/SDCard/Quandl/daily_data.feather
 
 .PHONY: quandl_download
 ## Hardcoded paths to append data to daily data on SD card
 quandl_download:
-	python data/reader.py download --output_dir=/Volumes/SDCard/
+	python app/data/reader.py download --output_dir=/Volumes/SDCard/
 
 .PHONY: kubectl_argo_local
 ## Local port forwarding to use argo with minikube for development
@@ -85,3 +95,14 @@ python_format:
 	black .
 	isort .
 
+
+.PHONY: docker_build
+## Build Market Navigator API docker image
+docker_build:
+	docker build -t market_navigator_api .
+
+.PHONY: docker_push
+## Push Market Navigator API docker image
+docker_push:
+	docker tag market_navigator_api registry.digitalocean.com/market-navigator-registry/market_navigator_api
+	docker push registry.digitalocean.com/market-navigator-registry/market_navigator_api

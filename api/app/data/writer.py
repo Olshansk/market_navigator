@@ -5,7 +5,7 @@ import pandas as pd
 import fire
 
 import logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 logger.debug(' Debug is working')
 
@@ -25,23 +25,41 @@ def recompute_daily_data_from_csv(
     output_dir: str,
     sharadar_daily_path: str,
     sharadar_sep_path: str
-) -> pd.DataFrame:
+) -> None:
     logger.debug("About to load data from csv")
     daily_metrics = pd.read_csv(sharadar_daily_path)
     daily_prices = pd.read_csv(sharadar_sep_path)
-
     logger.debug("About to compute data from csv")
     df_temp = daily_prices[['ticker', 'date','closeadj']].copy().rename(columns={'closeadj': 'price'})
     daily_data = daily_metrics.merge(df_temp, on=['date', 'ticker'], how='inner')
+    daily_data['lastupdated'] = pd.to_datetime(daily_data['lastupdated'])
     daily_data.sort_values(by=['date'], inplace=True)
+    daily_data = daily_data.reset_index()
+    daily_data.drop(columns=['index'], inplace=True)
 
     logger.debug("About to write full daily data to feather")
-    daily_data.reset_index().to_feather(os.path.join(output_dir, 'daily_data.feather'))
+    daily_data.to_feather(os.path.join(output_dir, 'daily_data.feather'))
+
     logger.debug("About to write full daily data to hdf5")
-    write_daily_data_to_hdf(daily_data, output_dir)
+    daily_data.set_index("date")
+    daily_data.index = pd.to_datetime(daily_data["date"])
+    daily_data = daily_data.drop(columns=['date'])
+    daily_data.sort_index(inplace=True)
+    try:
+        write_daily_data_to_hdf(daily_data, output_dir)
+    except:
+        print(f"""
+        **************************************************************************
+        There was an error write the feather data to HDFStore.
+        Try doing the following:
+            ipython
+            import pandas as pd
+            df = pd.from_feather('{os.path.join(output_dir, 'daily_data.feather')}')
+            df.to_hdf({os.path.join(output_dir, 'daily_data.h5')}, key='daily_data', format='t', data_columns=['ticker'])
+        **************************************************************************
+        """)
 
     logger.debug(f'Wrote new data to {output_dir}')
-    return daily_data
 
 def write_daily_data_to_hdf(df: pd.DataFrame, output_dir: str):
     filename = os.path.join(output_dir, 'daily_data.h5')

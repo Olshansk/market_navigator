@@ -3,10 +3,10 @@ import logging
 
 import pandas as pd
 
-from analysis.compute_metrics import compute_mm_metrics_for_ticker, format_message
-from analysis.plot_metrics import build_mm_histogram
-from files.keys import get_json_key, get_png_key
-from files.s3 import upload_file
+from app.analysis.compute_metrics import compute_mm_metrics_for_ticker, format_message
+from app.analysis.plot_metrics import build_mm_histogram
+from app.files.keys import get_json_key, get_png_key
+from app.files.s3 import upload_file
 
 
 def compute_new_data(ticker: str, df: pd.DataFrame):
