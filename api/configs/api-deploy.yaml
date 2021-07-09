@@ -1,0 +1,31 @@
+# mn-api Deployment
+# Defines the deployment of the app running in a pod on any worker node
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mn-api
+  labels:
+    app: mn-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mn-api
+  template:
+    metadata:
+      labels:
+        app: mn-api
+    spec:
+      imagePullSecrets:
+        - name: do-registry
+      containers:
+        - name: mn-api
+          image: registry.digitalocean.com/market-navigator-registry/market_navigator_api:latest
+          ports:
+            - containerPort: 8080
+          imagePullPolicy: Always
+          resources:
+            # You must specify requests for CPU to autoscale
+            # based on CPU utilization
+            requests:
+              cpu: "250m"

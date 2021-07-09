@@ -89,16 +89,18 @@ def append_to_daily_data_hdf(hdf_path: str) -> pd.DataFrame:
     store = pd.HDFStore(hdf_path)
     last_date = store.get_storer('daily_data').attrs.last_date
 
-    logging.debug("About to load new data")
+    logging.info("About to load new data after {last_append}")
     new_daily_data = quandl.get_table('SHARADAR/DAILY', date={'gte': last_date}, paginate=True)
     new_sep_data = quandl.get_table('SHARADAR/SEP', date={'gte': last_date}, paginate=True)
 
-    logging.debug("About to process new data")
+    logging.info("About to process new data")
     new_data = _merge_sep_and_daily_dfs(new_daily_data, new_sep_data)
     new_data = _format_df_for_h5(new_data)
 
     store.append('daily_data', new_data)
     store.get_storer('daily_data').attrs.last_date = new_data.index[-1].strftime('%Y-%m-%d')
+    all_tickers = set(store.get_storer('daily_data').attrs.tickers.split(';')).union(set(new_data['ticker'].unique()))
+    store.get_storer('daily_data').attrs.tickers = all_tickers
     store.close()
 
 if __name__ == '__main__':

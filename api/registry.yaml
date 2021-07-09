@@ -1,0 +1,9 @@
+apiVersion: v1
+data:
+  .dockerconfigjson: eyJhdXRocyI6eyJyZWdpc3RyeS5kaWdpdGFsb2NlYW4uY29tIjp7ImF1dGgiOiJNR014TjJFeFlqY3pPVFU0WXpoa05qSTNNbVpoWW1JMk1qZGhZVE0xT0RnNVltVmxZamd5TVRRNU9EUXhNMk5rWVdReE1XSXlaV016WmpReFpXSmhaam93WXpFM1lURmlOek01TlRoak9HUTJNamN5Wm1GaVlqWXlOMkZoTXpVNE9EbGlaV1ZpT0RJeE5EazROREV6WTJSaFpERXhZakpsWXpObU5ERmxZbUZtIn19fQ==
+kind: Secret
+metadata:
+  creationTimestamp: null
+  name: registry-market-navigator-registry
+  namespace: market-navigator-july
+type: kubernetes.io/dockerconfigjson
