@@ -11,8 +11,8 @@ BUCKET_PRIVATE = "market-navigator-private"
 DATE_FORMAT = "%a, %d %b %Y %H:%M:%S %Z"
 
 credentials = {
-    "aws_access_key_id": "AKIAQE3OIS3UUOIHOFHR",
-    "aws_secret_access_key": "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",
+    "aws_access_key_id": "",
+    "aws_secret_access_key": "",
 }
 
 s3_client = boto3.client("s3", "us-west-2", **credentials)
